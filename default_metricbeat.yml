@@ -1,0 +1,23 @@
+#==========================  Modules configuration ============================
+metricbeat.modules:
+- module: docker
+  metricsets:
+    - "container"
+    - "cpu"
+    - "diskio"
+    - "healthcheck"
+    - "info"
+    #- "image"
+    - "memory"
+    - "network"
+  hosts: []
+  period: 10s
+  enabled: true
+#================================ General =====================================
+fields:
+  logzio_codec: json
+fields_under_root: true
+#================================ Outputs =====================================
+output.logstash:
+  hosts: []
+  ssl.certificate_authorities: ['/etc/pki/tls/certs/COMODORSADomainValidationSecureServerCA.crt']
