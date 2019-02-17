@@ -93,5 +93,4 @@ elif "matchContainerName" in os.environ:
 elif "skipContainerName" in os.environ:
     _exclude_containers()
 
-
 os.system("metricbeat -e")
