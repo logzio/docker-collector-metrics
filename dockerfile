@@ -1,5 +1,9 @@
 FROM python:3.7-slim
 
+COPY default_metricbeat.yml ./default_metricbeat.yml
+COPY metricbeat-yml-script.py ./metricbeat-yml-script.py
+COPY requirements.txt ./requirements.txt
+
 RUN apt-get update && \
     apt-get install -y \
     curl \
@@ -11,9 +15,7 @@ RUN apt-get update && \
     mkdir -p /etc/pki/tls/certs && \
     cp COMODORSADomainValidationSecureServerCA.crt /etc/pki/tls/certs/ && \
     rm COMODORSADomainValidationSecureServerCA.crt && \
-    pip install ruamel.yaml
+    pip install -r requirements.txt
 
-COPY default_metricbeat.yml ./default_metricbeat.yml
-COPY metricbeat-yml-script.py ./metricbeat-yml-script.py
 
 CMD ["python","metricbeat-yml-script.py"]
