@@ -7,7 +7,7 @@ You can also ship docker logs with our [Docker-collector-logs](https://github.co
 
 To run the docker collector use this command:  
 ```
-docker run --env LOGZIO_TOKEN="{{LOGZIO_TOKEN}}" --env LOGZIO_URL="listener.logz.io:5015" -v /var/run/docker.sock:/var/run/docker.sock:ro logzio/docker-collector-metrics
+docker run --name docker-collector-metrics --env LOGZIO_TOKEN="{{LOGZIO_TOKEN}}" --env LOGZIO_URL="listener.logz.io:5015" -v /var/run/docker.sock:/var/run/docker.sock:ro logzio/docker-collector-metrics
 ```
 *Change the {{LOGZIO_TOKEN}} to your shipping token*  
 *If your account is in the eu region change the LOGZIO_URL enviorenment variable to listener-eu.logz.io:5015*
@@ -34,12 +34,12 @@ docker run --env LOGZIO_TOKEN="{{LOGZIO_TOKEN}}" --env LOGZIO_URL="listener.logz
 
 Shipping metrics from containers that their name contains "apache" or "nginx"
 ```
-docker run --env LOGZIO_TOKEN="{{LOGZIO_TOKEN}}" --env LOGZIO_URL="listener.logz.io:5015" --env matchContainerName="apache,nginx" -v /var/run/docker.sock:/var/run/docker.sock:ro logzio/docker-collector-metrics
+docker run --name docker-collector-metrics --env LOGZIO_TOKEN="{{LOGZIO_TOKEN}}" --env LOGZIO_URL="listener.logz.io:5015" --env matchContainerName="apache,nginx" -v /var/run/docker.sock:/var/run/docker.sock:ro logzio/docker-collector-metrics
 ```
 
 Shipping metrics from all containers except containers that their name contains "jenkins"
 ```
-docker run --env LOGZIO_TOKEN="{{LOGZIO_TOKEN}}" --env LOGZIO_URL="listener.logz.io:5015" --env skipContainerName="jenkins" -v /var/run/docker.sock:/var/run/docker.sock:ro logzio/docker-collector-metrics
+docker run --name docker-collector-metrics --env LOGZIO_TOKEN="{{LOGZIO_TOKEN}}" --env LOGZIO_URL="listener.logz.io:5015" --env skipContainerName="jenkins" -v /var/run/docker.sock:/var/run/docker.sock:ro logzio/docker-collector-metrics
 ```
 ## How it works
 This docker container is using a python script to generate a valid metricbeat configuration file based on your enviornment variables, and then starts the service.  
