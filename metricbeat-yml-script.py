@@ -49,7 +49,7 @@ def _exclude_containers():
     with open(METRICBEAT_CONF_PATH) as metricbeat_yml:
         config_dic = yaml.load(metricbeat_yml)
 
-    exclude_list = os.environ["skipContainerName"].split(",")
+    exclude_list = [container.strip() for container in os.environ["skipContainerName"].split(",")]
 
     drop_event = {"drop_event": {"when": {"or": []}}}
     config_dic["metricbeat.modules"][0]["processors"] = []
@@ -68,7 +68,7 @@ def _include_containers():
     with open(METRICBEAT_CONF_PATH) as metricbeat_yml:
         config_dic = yaml.load(metricbeat_yml)
 
-    include_list = os.environ["matchContainerName"].split(",")
+    include_list = [container.strip() for container in os.environ["matchContainerName"].split(",")]
 
     drop_event = {"drop_event": {"when": {"and": []}}}
     config_dic["metricbeat.modules"][0]["processors"] = []
