@@ -1,46 +1,48 @@
 # docker-collector-metrics
-This forwards your docker metrics to your [Logz.io](https://app.logz.io/) account using a metricbeat container.
-With this collector you can also exclude or include certain containers.
-You can also ship docker logs with our [Docker-collector-logs](https://github.com/logzio/docker-collector-logs).  
 
-## How to use the docker collector
+docker-collector-metrics is a Docker container that uses Metricbeat to collect metrics from other Docker containers and forward those metrics to your Logz.io account.
 
-To run the docker collector use this command:  
-```
-docker run --name docker-collector-metrics --env LOGZIO_TOKEN="{{LOGZIO_TOKEN}}" --env LOGZIO_URL="listener.logz.io:5015" -v /var/run/docker.sock:/var/run/docker.sock:ro logzio/docker-collector-metrics
-```
-*Change the {{LOGZIO_TOKEN}} to your shipping token*  
-*If your account is in the eu region change the LOGZIO_URL enviorenment variable to listener-eu.logz.io:5015*
+To use this container, you'll set environment variables in your docker run command.
+docker-collector-metrics uses those environment variables to generate a valid Metricbeat configuration for the container.
+docker-collector-metrics mounts docker.sock to the container itself, allowing Metricbeat to collect the metrics and metadata.
 
-### Supported enviornment variable
+By default, docker-collector-metrics ships `container`, `cpu`, `diskio`, `healthcheck`, `info`, `memory`, and `network` metrics.
 
-- LOGZIO_TOKEN - your logz.io shipping token
-- LOGZIO_URL - either listener-eu.logz.io:5015 or listener.logz.io:5015
-- matchContainerName (optional)- a comma separated list of the **only** containers you want the collector to collect the logs from
-- skipConatinerName (optional) - a comma separated list of containers you want to exclude
-*Only one of match or skip container name can be used*  
-*The filtering is done based on a contain operator so you can match part of a value,i.e skipContainerName = "apache,nginx" will skip logs from any container that it's name contains apache or nginx*  
+docker-collector-metrics ships metrics only. If you want to ship logs to Logz.io, see [docker-collector-logs](https://github.com/logzio/docker-collector-logs).
 
-### Metricsets enabled by default
-- "container"
-- "cpu"
-- "diskio"
-- "healthcheck"
-- "info"
-- "memory"
-- "network"
+## docker-collector-metrics setup
 
-### Examples of possible commands
+### 1. Pull the Docker image
 
-Shipping metrics from containers that their name contains "apache" or "nginx"
-```
-docker run --name docker-collector-metrics --env LOGZIO_TOKEN="{{LOGZIO_TOKEN}}" --env LOGZIO_URL="listener.logz.io:5015" --env matchContainerName="apache,nginx" -v /var/run/docker.sock:/var/run/docker.sock:ro logzio/docker-collector-metrics
+Download the logzio/docker-collector-metrics image:
+
+```shell
+docker pull logzio/docker-collector-metrics
 ```
 
-Shipping metrics from all containers except containers that their name contains "jenkins"
+### 2. Run the Docker image
+
+For a complete list of options, see the parameters below the code block.👇
+
+```shell
+docker run logzio/docker-collector-metrics \
+--name docker-collector-metrics \
+--env LOGZIO_TOKEN="<ACCOUNT-TOKEN>" \
+--env LOGZIO_URL="<LISTENER-URL>:5015" \
+-v /var/run/docker.sock:/var/run/docker.sock:ro
 ```
-docker run --name docker-collector-metrics --env LOGZIO_TOKEN="{{LOGZIO_TOKEN}}" --env LOGZIO_URL="listener.logz.io:5015" --env skipContainerName="jenkins" -v /var/run/docker.sock:/var/run/docker.sock:ro logzio/docker-collector-metrics
-```
-## How it works
-This docker container is using a python script to generate a valid metricbeat configuration file based on your enviornment variables, and then starts the service.  
-The container mounts the docker sock to the docker collector container itself so metricbeat will be able to fetch the metrics and the metadata.
+
+#### Parameters
+
+| Parameter | Description |
+|---|---|
+| **LOGZIO_TOKEN** | **Required**. Your Logz.io account token. Replace `<ACCOUNT-TOKEN>` with the [token](https://app.logz.io/#/dashboard/settings/general) of the account you want to ship to. |
+| **LOGZIO_URL** | **Required**. Logz.io listener URL to ship the metrics to. This URL changes depending on the region your account is hosted in. For example, accounts in the US region ship to `listener.logz.io`, and accounts in the EU region ship to `listener-eu.logz.io`. <br /> For more information, see [Account region](https://docs.logz.io/user-guide/accounts/account-region.html) on the Logz.io Docs. |
+| **matchContainerName** | Comma-separated list of containers you want to collect metrics from. If a container's name partially matches a name on the list, that container's metrics are shipped. Otherwise, its metrics are ignored. <br /> **Note**: Can't be used with `skipContainerName` |
+| **skipContainerName** | Comma-separated list of containers you want to ignore. If a container's name partially matches a name on the list, that container's metrics are ignored. Otherwise, its metrics are shipped. <br /> **Note**: Can't be used with `matchContainerName` |
+
+**Note**: By default, metrics from `docker-collector-logs` and `docker-collector-metrics` containers are ignored.
+
+### 3. Check Logz.io for your metrics
+
+Spin up your Docker containers if you haven’t done so already. Give your metrics a few minutes to get from your system to ours, and then open [Kibana](https://app.logz.io/#/dashboard/kibana).
