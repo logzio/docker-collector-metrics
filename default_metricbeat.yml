@@ -16,6 +16,7 @@ metricbeat.modules:
 #================================ General =====================================
 fields:
   logzio_codec: json
+  type: docker-collector-metrics
 fields_under_root: true
 #================================ Outputs =====================================
 output.logstash:
