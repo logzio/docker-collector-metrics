@@ -25,11 +25,11 @@ docker pull logzio/docker-collector-metrics
 For a complete list of options, see the parameters below the code block.👇
 
 ```shell
-docker run logzio/docker-collector-metrics \
---name docker-collector-metrics \
+docker run --name docker-collector-metrics \
 --env LOGZIO_TOKEN="<ACCOUNT-TOKEN>" \
 --env LOGZIO_URL="<LISTENER-URL>:5015" \
--v /var/run/docker.sock:/var/run/docker.sock:ro
+-v /var/run/docker.sock:/var/run/docker.sock:ro \
+logzio/docker-collector-metrics
 ```
 
 #### Parameters
