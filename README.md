@@ -47,3 +47,6 @@ logzio/docker-collector-metrics
 ### 3. Check Logz.io for your metrics
 
 Spin up your Docker containers if you haven’t done so already. Give your metrics a few minutes to get from your system to ours, and then open [Kibana](https://app.logz.io/#/dashboard/kibana).
+
+## Change log
+ - **v0.0.2**: added the ability to set the type to fetched metrics.
