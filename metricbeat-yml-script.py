@@ -8,6 +8,8 @@ import socket
 logzio_url = os.environ["LOGZIO_URL"]
 logzio_url_arr = logzio_url.split(":")
 logzio_token = os.environ["LOGZIO_TOKEN"]
+logzio_type = os.getenv("LOGZIO_TYPE", "docker-collector-metrics")
+
 docker_sock_path = "unix:///var/run/docker.sock"
 
 HOST = logzio_url_arr[0]
@@ -39,6 +41,7 @@ def _add_shipping_data():
     config_dic["output.logstash"]["hosts"].append(logzio_url)
     config_dic["metricbeat.modules"][0]["hosts"].append(docker_sock_path)
     config_dic["fields"]["token"] = logzio_token
+    config_dic["fields"]["type"] = logzio_type
 
     with open(METRICBEAT_CONF_PATH, "w+") as metricbeat_yml:
         yaml.dump(config_dic, metricbeat_yml)

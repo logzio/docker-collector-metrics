@@ -38,6 +38,7 @@ logzio/docker-collector-metrics
 |---|---|
 | **LOGZIO_TOKEN** | **Required**. Your Logz.io account token. Replace `<ACCOUNT-TOKEN>` with the [token](https://app.logz.io/#/dashboard/settings/general) of the account you want to ship to. |
 | **LOGZIO_URL** | **Required**. Logz.io listener URL to ship the metrics to. This URL changes depending on the region your account is hosted in. For example, accounts in the US region ship to `listener.logz.io`, and accounts in the EU region ship to `listener-eu.logz.io`. <br /> For more information, see [Account region](https://docs.logz.io/user-guide/accounts/account-region.html) on the Logz.io Docs. |
+| **LOGZIO_TYPE** | **Default**: `docker-collector-metrics` <br /> Logz.io type you'll use with this Docker. This is shown in your logs under the `type` field in Kibana. Logz.io applies parsing based on type. |
 | **matchContainerName** | Comma-separated list of containers you want to collect metrics from. If a container's name partially matches a name on the list, that container's metrics are shipped. Otherwise, its metrics are ignored. <br /> **Note**: Can't be used with `skipContainerName` |
 | **skipContainerName** | Comma-separated list of containers you want to ignore. If a container's name partially matches a name on the list, that container's metrics are ignored. Otherwise, its metrics are shipped. <br /> **Note**: Can't be used with `matchContainerName` |
 
@@ -46,3 +47,6 @@ logzio/docker-collector-metrics
 ### 3. Check Logz.io for your metrics
 
 Spin up your Docker containers if you haven’t done so already. Give your metrics a few minutes to get from your system to ours, and then open [Kibana](https://app.logz.io/#/dashboard/kibana).
+
+## Change log
+ - **v0.0.2**: added the ability to set the type to fetched metrics.
