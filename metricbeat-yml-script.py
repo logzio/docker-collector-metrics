@@ -33,11 +33,10 @@ def _is_open():
 
 
 def _add_modules():
-    if os.getenv("LOGZIO_CUSTOM_MODULES", None):
-        return
-
     try:
         modules = [m.strip() for m in os.environ["LOGZIO_MODULES"].split(",")]
+        if len(modules) == 1 and modules[0] == "custom":
+            return
     except KeyError:
         logger.error("Required at least one module")
         raise RuntimeError
