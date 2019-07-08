@@ -14,10 +14,11 @@ LOG_LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 
 def _get_logger():
     try:
-        user_level = os.environ["LOGZIO_LOG_LEVEL"]
-        level = user_level if user_level.upper() in LOG_LEVELS else DEFAULT_LOG_LEVEL
+        user_level = os.environ["LOGZIO_LOG_LEVEL"].upper()
+        level = user_level if user_level in LOG_LEVELS else DEFAULT_LOG_LEVEL
     except KeyError:
         level = DEFAULT_LOG_LEVEL
+
     logging.basicConfig(format='%(asctime)s\t\t%(levelname)s\t[%(name)s]\t%(filename)s:%(lineno)d\t%(message)s',
                         level=level)
     return logging.getLogger(__name__)
@@ -39,8 +40,13 @@ def _is_open():
 def _add_modules():
     try:
         modules = [m.strip() for m in os.environ["LOGZIO_MODULES"].split(",")]
-        if len(modules) == 1 and modules[0] == "custom":
-            return
+        if "custom" in modules:
+            if len(modules) == 0:
+                return
+            else:
+                logger.error("We support custom modules configuration or our own but not both")
+                raise RuntimeError
+
     except KeyError:
         logger.error("Required at least one module")
         raise RuntimeError
