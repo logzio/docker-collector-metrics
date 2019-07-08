@@ -5,24 +5,28 @@ import socket
 from ruamel.yaml import YAML
 from modules import setups
 
-# set vars and consts
-logzio_url = os.environ["LOGZIO_URL"]
-logzio_token = os.environ["LOGZIO_TOKEN"]
-
 SOCKET_TIMEOUT = 3
 METRICBEAT_CONF_PATH = "/etc/metricbeat/metricbeat.yml"
 MODULES_DIR = "modules.d/"
+DEFAULT_LOG_LEVEL = "INFO"
+LOG_LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 
 
-logging.basicConfig(format='%(asctime)s\t\t%(levelname)s\t[%(name)s]\t%(filename)s:%(lineno)d\t%(message)s',
-                    level=logging.INFO)
-logger = logging.getLogger(__name__)
+def _get_logger():
+    try:
+        user_level = os.environ["LOGZIO_LOG_LEVEL"]
+        level = user_level if user_level.upper() in LOG_LEVELS else DEFAULT_LOG_LEVEL
+    except KeyError:
+        level = DEFAULT_LOG_LEVEL
+    logging.basicConfig(format='%(asctime)s\t\t%(levelname)s\t[%(name)s]\t%(filename)s:%(lineno)d\t%(message)s',
+                        level=level)
+    return logging.getLogger(__name__)
 
 
 def _is_open():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.settimeout(SOCKET_TIMEOUT)
-    host, port = logzio_url.split(":")
+    host, port = url.split(":")
     result = sock.connect_ex((host, int(port)))
     if result == 0:
         logger.info("Connection Established")
@@ -59,14 +63,18 @@ def _add_shipping_data():
     with open("metricbeat.yml") as yml:
         conf = yaml.load(yml)
 
-    conf["output.logstash"]["hosts"].append(logzio_url)
-    conf["fields"]["token"] = logzio_token
+    conf["output.logstash"]["hosts"].append(url)
+    conf["fields"]["token"] = token
     conf["fields"]["type"] = os.getenv("LOGZIO_TYPE", "docker-collector-metrics")
 
     with open(METRICBEAT_CONF_PATH, "w+") as yml:
         logger.debug("Using the following meatricbeat configuration: {}".format(conf))
         yaml.dump(conf, yml)
 
+
+url = os.environ["LOGZIO_URL"]
+token = os.environ["LOGZIO_TOKEN"]
+logger = _get_logger()
 
 _is_open()
 _add_modules()
