@@ -45,6 +45,10 @@ def _add_modules():
         logger.error("Required at least one module")
         raise RuntimeError
 
+    _dump_modules(modules)
+
+
+def _dump_modules(modules):
     yaml = YAML()
     supported_modules = dict((name, setup) for name, setup in setups)
     for module in modules:
