@@ -1,11 +1,13 @@
 import logging
 import os
 import socket
+import glob
 
 from ruamel.yaml import YAML
 from modules import setups
 
 SOCKET_TIMEOUT = 3
+FIRST_CHAR = 0
 METRICBEAT_CONF_PATH = "/etc/metricbeat/metricbeat.yml"
 MODULES_DIR = "modules.d/"
 DEFAULT_LOG_LEVEL = "INFO"
@@ -38,20 +40,20 @@ def _is_open():
 
 
 def _add_modules():
+    if _custom_modules():
+        logger.debug("Using custom modules")
+        return
     try:
         modules = [m.strip() for m in os.environ["LOGZIO_MODULES"].split(",")]
-        if "custom" in modules:
-            if len(modules) == 0:
-                return
-            else:
-                logger.error("We support custom modules configuration or our own but not both")
-                raise RuntimeError
-
     except KeyError:
         logger.error("Required at least one module")
         raise RuntimeError
 
     _dump_modules(modules)
+
+
+def _custom_modules():
+    return len(glob.glob("modules.d/*.yml"))
 
 
 def _dump_modules(modules):
@@ -77,9 +79,45 @@ def _add_shipping_data():
     conf["fields"]["token"] = token
     conf["fields"]["type"] = os.getenv("LOGZIO_TYPE", "docker-collector-metrics")
 
+    additional_field = _get_additional_fields()
+    for key in additional_field:
+        conf["fields"][key] = additional_field[key]
+
     with open(METRICBEAT_CONF_PATH, "w+") as yml:
         logger.debug("Using the following meatricbeat configuration: {}".format(conf))
         yaml.dump(conf, yml)
+
+
+def _get_additional_fields():
+    try:
+        additional_fields = os.environ["LOGZIO_ADDITIONAL_FIELDS"]
+    except KeyError:
+        return {}
+
+    fields = {}
+    filtered = dict(parse_entry(entry) for entry in additional_fields.split(";"))
+
+    for key, value in filtered.items():
+        if value[FIRST_CHAR] == "$":
+            try:
+                fields[key] = os.environ[value[FIRST_CHAR+1:]]
+            except KeyError:
+                continue
+        else:
+            fields[key] = value
+
+    return fields
+
+
+def parse_entry(entry):
+    try:
+        key, value = entry.split("=")
+    except ValueError:
+        raise ValueError("Failed to parse entry: {}".format(entry))
+
+    if key == "" or value == "":
+        raise ValueError("Failed to parse entry: {}".format(entry))
+    return key, value
 
 
 url = os.environ["LOGZIO_URL"]
