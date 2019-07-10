@@ -13,7 +13,7 @@ RUN apt-get update && \
     rm COMODORSADomainValidationSecureServerCA.crt && \
     pip install -r requirements.txt && \
     rm requirements.txt && \
-    mkdir modules.d
+    mkdir logzio_modules
 
 COPY modules ./modules
 COPY metricbeat.yml ./metricbeat.yml

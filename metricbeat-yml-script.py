@@ -9,7 +9,7 @@ from modules import setups
 SOCKET_TIMEOUT = 3
 FIRST_CHAR = 0
 METRICBEAT_CONF_PATH = "/etc/metricbeat/metricbeat.yml"
-MODULES_DIR = "modules.d/"
+MODULES_DIR = "logzio_modules/"
 DEFAULT_LOG_LEVEL = "INFO"
 LOG_LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 
