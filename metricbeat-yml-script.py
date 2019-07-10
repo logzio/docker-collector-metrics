@@ -14,7 +14,7 @@ DEFAULT_LOG_LEVEL = "INFO"
 LOG_LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 
 
-def _get_logger():
+def _create_logger():
     try:
         user_level = os.environ["LOGZIO_LOG_LEVEL"].upper()
         level = user_level if user_level in LOG_LEVELS else DEFAULT_LOG_LEVEL
@@ -49,31 +49,34 @@ def _add_modules():
         logger.error("Required at least one module")
         raise RuntimeError
 
-    _dump_modules(modules)
+    _enable_modules(modules)
 
 
 def _custom_modules():
-    return len(glob.glob("modules.d/*.yml"))
+    return len(glob.glob("{}/*.yml".format(MODULES_DIR)))
 
 
-def _dump_modules(modules):
+def _enable_modules(modules):
     yaml = YAML()
     supported_modules = dict((name, setup) for name, setup in setups)
     for module in modules:
         if module in supported_modules:
             conf = supported_modules[module]()
-            with open("{0}{1}{2}".format(MODULES_DIR, module, ".yml"), "w+") as yml:
+            with open("{0}{1}{2}".format(MODULES_DIR, module, ".yml"), "w+") as conf_yaml:
                 logger.debug("Adding the following conf: {}".format(conf))
-                yaml.dump(conf, yml)
+                yaml.dump(conf, conf_yaml)
         else:
             logger.error("Unsupported module: {}".format(module))
             raise RuntimeError
 
 
 def _add_shipping_data():
+    url = os.environ["LOGZIO_URL"]
+    token = os.environ["LOGZIO_TOKEN"]
+
     yaml = YAML()
-    with open("metricbeat.yml") as yml:
-        conf = yaml.load(yml)
+    with open("metricbeat.yml") as default_metricbeat_yaml:
+        conf = yaml.load(default_metricbeat_yaml)
 
     conf["output.logstash"]["hosts"].append(url)
     conf["fields"]["token"] = token
@@ -83,9 +86,9 @@ def _add_shipping_data():
     for key in additional_field:
         conf["fields"][key] = additional_field[key]
 
-    with open(METRICBEAT_CONF_PATH, "w+") as yml:
+    with open(METRICBEAT_CONF_PATH, "w+") as main_metricbeat_yaml:
         logger.debug("Using the following meatricbeat configuration: {}".format(conf))
-        yaml.dump(conf, yml)
+        yaml.dump(conf, main_metricbeat_yaml)
 
 
 def _get_additional_fields():
@@ -120,9 +123,7 @@ def parse_entry(entry):
     return key, value
 
 
-url = os.environ["LOGZIO_URL"]
-token = os.environ["LOGZIO_TOKEN"]
-logger = _get_logger()
+logger = _create_logger()
 
 _is_open()
 _add_modules()
