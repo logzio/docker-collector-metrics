@@ -104,7 +104,7 @@ def _get_additional_fields():
             try:
                 fields[key] = os.environ[value[FIRST_CHAR+1:]]
             except KeyError:
-                continue
+                fields[key] = "Error parsing environment variable"
         else:
             fields[key] = value
 
