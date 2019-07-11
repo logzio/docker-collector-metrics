@@ -2,6 +2,7 @@ import logging
 import os
 
 from ruamel.yaml import YAML
+from ..utility.utility import set_key_from_env, set_mapping_from_env
 
 DOCKER_YML_PATH = "{}/docker.yml".format(os.path.dirname(os.path.realpath(__file__)))
 MODULE_NAME = "docker"
@@ -46,37 +47,19 @@ def _filter_containers(conf):
 
 
 def _set_period(conf):
-    try:
-        period = os.environ["DOCKER_PERIOD"]
-    except KeyError:
-        return
-
-    conf["period"] = period
-    logger.debug("Set docker period to {0}".format(period))
+    set_key_from_env(conf, "period", "DOCKER_PERIOD")
 
 
 def _set_certificate(conf):
-    try:
-        ssl_conf = {
-            "certificate_authority": os.environ["DOCKER_CERTIFICATE_AUTHORITY"],
-            "certificate": os.environ["DOCKER_CERTIFICATE"],
-            "key": os.environ["DOCKER_KEY"],
-        }
-    except KeyError:
-        return
-
-    conf["ssl"] = ssl_conf
-    logger.debug("Set ssl parameters: {0}".format(ssl_conf))
+    set_mapping_from_env(conf, "ssl", {
+        "certificate_authority": "DOCKER_CERTIFICATE_AUTHORITY",
+        "certificate": "DOCKER_CERTIFICATE",
+        "key": "DOCKER_KEY",
+    })
 
 
 def _set_cpu_per_core(conf):
-    try:
-        enable_cpu_per_core = os.environ["DOCKER_CPU_PER_CORE"]
-    except KeyError:
-        return
-
-    conf["cpu.cores"] = enable_cpu_per_core
-    logger.debug("Set cpu cores flag to {0}".format(enable_cpu_per_core))
+    set_key_from_env(conf, "cpu.cores", "DOCKER_CPU_PER_CORE")
 
 
 def _set_host(conf):

@@ -9,7 +9,7 @@ from modules import setups
 SOCKET_TIMEOUT = 3
 FIRST_CHAR = 0
 METRICBEAT_CONF_PATH = "/etc/metricbeat/metricbeat.yml"
-MODULES_DIR = "logzio_modules/"
+MODULES_DIR = os.environ["LOGZIO_MODULES_PATH"]
 DEFAULT_LOG_LEVEL = "INFO"
 LOG_LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 
@@ -47,7 +47,7 @@ def _add_modules():
         modules = [m.strip() for m in os.environ["LOGZIO_MODULES"].split(",")]
     except KeyError:
         logger.error("Required at least one module")
-        raise RuntimeError
+        raise
 
     _enable_modules(modules)
 
@@ -62,7 +62,7 @@ def _enable_modules(modules):
     for module in modules:
         if module in supported_modules:
             conf = supported_modules[module]()
-            with open("{0}{1}{2}".format(MODULES_DIR, module, ".yml"), "w+") as conf_yaml:
+            with open("{0}/{1}{2}".format(MODULES_DIR, module, ".yml"), "w+") as conf_yaml:
                 logger.debug("Adding the following conf: {}".format(conf))
                 yaml.dump(conf, conf_yaml)
         else:
@@ -71,7 +71,6 @@ def _enable_modules(modules):
 
 
 def _add_shipping_data():
-    url = os.environ["LOGZIO_URL"]
     token = os.environ["LOGZIO_TOKEN"]
 
     yaml = YAML()
@@ -123,6 +122,7 @@ def parse_entry(entry):
     return key, value
 
 
+url = os.environ["LOGZIO_URL"]
 logger = _create_logger()
 
 _is_open()
