@@ -16,10 +16,11 @@ def _exclude_containers(conf):
     drop_event = {"drop_event": {"when": {"or": []}}}
     conf["processors"] = []
     conf["processors"].append(drop_event)
+    drop_event_list = conf["processors"][0]["drop_event"]["when"]["or"]
 
     for container_name in exclude_list:
         contains = {"contains": {"docker.container.name": container_name}}
-        conf["processors"][0]["drop_event"]["when"]["or"].append(contains)
+        drop_event_list.append(contains)
         logger.debug("Adding {0} to the exclude containers list".format(container_name))
 
 
@@ -29,10 +30,11 @@ def _include_containers(conf):
     drop_event = {"drop_event": {"when": {"and": []}}}
     conf["processors"] = []
     conf["processors"].append(drop_event)
+    drop_event_list = conf["processors"][0]["drop_event"]["when"]["and"]
 
     for container_name in include_list:
         contains = {"not": {"contains": {"docker.container.name": container_name}}}
-        conf["processors"][0]["drop_event"]["when"]["and"].append(contains)
+        drop_event_list.append(contains)
         logger.debug("Adding {0} to the include containers list".format(container_name))
 
 
