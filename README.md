@@ -39,8 +39,7 @@ logzio/docker-collector-metrics
 | **LOGZIO_TYPE** | **Default**: `docker-collector-metrics` <br /> Logz.io type you'll use with this Docker. This is shown in your logs under the `type` field in Kibana. Logz.io applies parsing based on type. |
 | **LOGZIO_LOG_LEVEL** | **Default**: `"INFO"` <br /> The log level the scripts will use|
 | **LOGZIO_MODULES** | **Required** The meatricbeat modules we will use for this container|
-| **LOGZIO_ADDITIONAL_FIELDS** | nclude additional fields with every message sent, formatted as "fieldName1=fieldValue1;fieldName2=fieldValue2". 
-To use an environment variable, format as "fieldName1=fieldValue1;fieldName2=$ENV_VAR_NAME". In that case, the environment variable should be the only value in the field. If the environment variable can’t be resolved, the field is omitted.|
+| **LOGZIO_ADDITIONAL_FIELDS** | nclude additional fields with every message sent, formatted as "fieldName1=fieldValue1;fieldName2=fieldValue2". To use an environment variable, format as "fieldName1=fieldValue1;fieldName2=$ENV_VAR_NAME". In that case, the environment variable should be the only value in the field. If the environment variable can’t be resolved, the field is omitted.|
 
 **Note**: By default, metrics from `docker-collector-logs` and `docker-collector-metrics` containers are ignored.
 
