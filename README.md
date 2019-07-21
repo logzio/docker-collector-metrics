@@ -44,6 +44,8 @@ logzio/docker-collector-metrics
 
 **Note**: By default, metrics from `docker-collector-logs` and `docker-collector-metrics` containers are ignored.
 
+<!-- todo list of supported modules -->
+
 ### 3. Check Logz.io for your metrics
 
 Spin up your Docker containers if you haven’t done so already. Give your metrics a few minutes to get from your system to ours, and then open [Kibana](https://app.logz.io/#/dashboard/kibana).
