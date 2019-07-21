@@ -39,7 +39,7 @@ logzio/docker-collector-metrics
 | **LOGZIO_URL** | **Required**. Logz.io listener URL to ship the metrics to. This URL changes depending on the region your account is hosted in. For example, accounts in the US region ship to `listener.logz.io`, and accounts in the EU region ship to `listener-eu.logz.io`. <br /> For more information, see [Account region](https://docs.logz.io/user-guide/accounts/account-region.html) on the Logz.io Docs. |
 | **LOGZIO_TYPE** | **Default**: `docker-collector-metrics` <br /> Logz.io type you'll use with this Docker. This is shown in your logs under the `type` field in Kibana. Logz.io applies parsing based on type. |
 | **LOGZIO_LOG_LEVEL** | **Default**: `"INFO"` <br /> The log level the scripts will use|
-| **LOGZIO_MODULES** | **Required** The meatricbeat modules we will use for this container separated by ',' delimiter, formatted as "module1,module1,,module3"|
+| **LOGZIO_MODULES** | **Required** The meatricbeat modules we will use for this container separated by ',' delimiter, formatted as "module1,module1,,module3". If you want to use your custom module configuration file you need to mount its folder to `/logzio/logzio_modules`|
 | **LOGZIO_ADDITIONAL_FIELDS** | include additional fields with every message sent, formatted as "fieldName1=fieldValue1;fieldName2=fieldValue2". To use an environment variable, format as "fieldName1=fieldValue1;fieldName2=$ENV_VAR_NAME". In that case, the environment variable should be the only value in the field. If the environment variable can’t be resolved, the field is omitted.|
 
 **Note**: By default, metrics from `docker-collector-logs` and `docker-collector-metrics` containers are ignored.
