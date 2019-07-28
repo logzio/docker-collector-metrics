@@ -1,6 +1,6 @@
 # Docker Metrics Collector - docker module
 
-Docker Metrics Collector is a container that runs Metricbeat with the modules you enable at runtime.
+Docker Metrics Collector is an image that runs Metricbeat with the modules you enable at runtime.
 If you're not already running Docker Metrics Collector, follow the steps in [Configuration](#configuration) below.
 
 Otherwise, stop the container, add `docker` to the `LOGZIO_MODULES` environment variable, and restart.
