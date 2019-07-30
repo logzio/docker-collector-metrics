@@ -1,99 +1,132 @@
 import logging
 import os
-from ruamel.yaml import YAML
 import socket
+import glob
 
-# set vars and consts
+from ruamel.yaml import YAML
+from modules import setups
 
-logzio_url = os.environ["LOGZIO_URL"]
-logzio_url_arr = logzio_url.split(":")
-logzio_token = os.environ["LOGZIO_TOKEN"]
-logzio_type = os.getenv("LOGZIO_TYPE", "docker-collector-metrics")
-
-docker_sock_path = "unix:///var/run/docker.sock"
-
-HOST = logzio_url_arr[0]
-PORT = int(logzio_url_arr[1])
 SOCKET_TIMEOUT = 3
+FIRST_CHAR = 0
 METRICBEAT_CONF_PATH = "/etc/metricbeat/metricbeat.yml"
+MODULES_DIR = os.environ["LOGZIO_MODULES_PATH"]
+DEFAULT_LOG_LEVEL = "INFO"
+LOG_LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 
-logging.basicConfig(format='%(asctime)s\t%(levelname)s\t%(message)s', level=logging.DEBUG)
+
+def _create_logger():
+    try:
+        user_level = os.environ["LOGZIO_LOG_LEVEL"].upper()
+        level = user_level if user_level in LOG_LEVELS else DEFAULT_LOG_LEVEL
+    except KeyError:
+        level = DEFAULT_LOG_LEVEL
+
+    logging.basicConfig(format='%(asctime)s\t\t%(levelname)s\t[%(name)s]\t%(filename)s:%(lineno)d\t%(message)s',
+                        level=level)
+    return logging.getLogger(__name__)
 
 
 def _is_open():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.settimeout(SOCKET_TIMEOUT)
-
-    result = sock.connect_ex((HOST, PORT))
+    host, port = url.split(":")
+    result = sock.connect_ex((host, int(port)))
     if result == 0:
-        logging.info("Connection Established")
+        logger.info("Connection Established")
     else:
-        logging.error("Can't connect to the listener, "
-                      "please remove any firewall settings to host:{} port:{}".format(HOST, str(PORT)))
+        logger.error("Can't connect to the listener, please remove any firewall settings to host:{0} port:{1}"
+                     .format(host, port))
         raise ConnectionError
 
 
+def _add_modules():
+    if _custom_modules():
+        logger.debug("Using custom modules")
+        return
+    try:
+        modules = [m.strip() for m in os.environ["LOGZIO_MODULES"].split(",")]
+    except KeyError:
+        logger.error("Required at least one module")
+        raise
+
+    _enable_modules(modules)
+
+
+def _custom_modules():
+    return len(glob.glob("{}/*.yml".format(MODULES_DIR)))
+
+
+def _enable_modules(modules):
+    yaml = YAML()
+    supported_modules = dict((name, setup) for name, setup in setups)
+    for module in modules:
+        if module in supported_modules:
+            conf = supported_modules[module]()
+            with open("{0}/{1}{2}".format(MODULES_DIR, module, ".yml"), "w+") as conf_yaml:
+                logger.debug("Adding the following conf: {}".format(conf))
+                yaml.dump(conf, conf_yaml)
+        else:
+            logger.error("Unsupported module: {}".format(module))
+            raise RuntimeError
+
+
 def _add_shipping_data():
+    token = os.environ["LOGZIO_TOKEN"]
+
     yaml = YAML()
-    with open("default_metricbeat.yml") as default_metricbeat_yml:
-        config_dic = yaml.load(default_metricbeat_yml)
+    with open("metricbeat.yml") as default_metricbeat_yaml:
+        conf = yaml.load(default_metricbeat_yaml)
 
-    config_dic["output.logstash"]["hosts"].append(logzio_url)
-    config_dic["metricbeat.modules"][0]["hosts"].append(docker_sock_path)
-    config_dic["fields"]["token"] = logzio_token
-    config_dic["fields"]["type"] = logzio_type
+    conf["output.logstash"]["hosts"].append(url)
+    conf["fields"]["token"] = token
+    conf["fields"]["type"] = os.getenv("LOGZIO_TYPE", "docker-collector-metrics")
 
-    with open(METRICBEAT_CONF_PATH, "w+") as metricbeat_yml:
-        yaml.dump(config_dic, metricbeat_yml)
+    additional_field = _get_additional_fields()
+    for key in additional_field:
+        conf["fields"][key] = additional_field[key]
 
-
-def _exclude_containers():
-    yaml = YAML()
-    with open(METRICBEAT_CONF_PATH) as metricbeat_yml:
-        config_dic = yaml.load(metricbeat_yml)
-
-    exclude_list = [container.strip() for container in os.environ["skipContainerName"].split(",")]
-
-    drop_event = {"drop_event": {"when": {"or": []}}}
-    config_dic["metricbeat.modules"][0]["processors"] = []
-    config_dic["metricbeat.modules"][0]["processors"].append(drop_event)
-
-    for container_name in exclude_list:
-        contains = {"contains": {"docker.container.name": container_name}}
-        config_dic["metricbeat.modules"][0]["processors"][0]["drop_event"]["when"]["or"].append(contains)
-
-    with open(METRICBEAT_CONF_PATH, "w+") as updated_metricbeat_yml:
-        yaml.dump(config_dic, updated_metricbeat_yml)
+    with open(METRICBEAT_CONF_PATH, "w+") as main_metricbeat_yaml:
+        logger.debug("Using the following meatricbeat configuration: {}".format(conf))
+        yaml.dump(conf, main_metricbeat_yaml)
 
 
-def _include_containers():
-    yaml = YAML()
-    with open(METRICBEAT_CONF_PATH) as metricbeat_yml:
-        config_dic = yaml.load(metricbeat_yml)
+def _get_additional_fields():
+    try:
+        additional_fields = os.environ["LOGZIO_ADDITIONAL_FIELDS"]
+    except KeyError:
+        return {}
 
-    include_list = [container.strip() for container in os.environ["matchContainerName"].split(",")]
+    fields = {}
+    filtered = dict(parse_entry(entry) for entry in additional_fields.split(";"))
 
-    drop_event = {"drop_event": {"when": {"and": []}}}
-    config_dic["metricbeat.modules"][0]["processors"] = []
-    config_dic["metricbeat.modules"][0]["processors"].append(drop_event)
+    for key, value in filtered.items():
+        if value[FIRST_CHAR] == "$":
+            try:
+                fields[key] = os.environ[value[FIRST_CHAR+1:]]
+            except KeyError:
+                fields[key] = "Error parsing environment variable"
+        else:
+            fields[key] = value
 
-    for container_name in include_list:
-        contains = {"not": {"contains": {"docker.container.name": container_name}}}
-        config_dic["metricbeat.modules"][0]["processors"][0]["drop_event"]["when"]["and"].append(contains)
+    return fields
 
-    with open(METRICBEAT_CONF_PATH, "w+") as updated_metricbeat_yml:
-        yaml.dump(config_dic, updated_metricbeat_yml)
 
+def parse_entry(entry):
+    try:
+        key, value = entry.split("=")
+    except ValueError:
+        raise ValueError("Failed to parse entry: {}".format(entry))
+
+    if key == "" or value == "":
+        raise ValueError("Failed to parse entry: {}".format(entry))
+    return key, value
+
+
+url = os.environ["LOGZIO_URL"]
+logger = _create_logger()
 
 _is_open()
+_add_modules()
 _add_shipping_data()
-
-if "matchContainerName" in os.environ and "skipContainerName" in os.environ:
-    logging.error("Can have only one of skipContainerName or matchContainerName")
-    raise KeyError
-elif "matchContainerName" in os.environ:
-    _include_containers()
-elif "skipContainerName" in os.environ:
-    _exclude_containers()
 
 os.system("metricbeat -e")

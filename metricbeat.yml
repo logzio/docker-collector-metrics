@@ -1,18 +1,7 @@
 #==========================  Modules configuration ============================
-metricbeat.modules:
-- module: docker
-  metricsets:
-    - "container"
-    - "cpu"
-    - "diskio"
-    - "healthcheck"
-    - "info"
-    #- "image"
-    - "memory"
-    - "network"
-  hosts: []
-  period: 10s
-  enabled: true
+metricbeat.config.modules:
+  path: ${LOGZIO_MODULES_PATH}/*.yml
+
 #================================ General =====================================
 fields:
   logzio_codec: json
