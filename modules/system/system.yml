@@ -1,4 +1,3 @@
-metricbeat.modules:
 - module: system
   metricsets:
     - "cpu"
