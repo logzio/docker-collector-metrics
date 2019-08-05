@@ -1,0 +1,21 @@
+metricbeat.modules:
+- module: system
+  metricsets:
+    - "cpu"
+    - "diskio"
+    - "memory"
+    - "network"
+#    - "core"
+    - "filesystem"
+    - "fsstat"
+    - "load"
+    - "process"
+    - "process_summary"
+    - "raid"
+    - "socket"
+    - "socket_summary"
+    - "uptime"
+  cpu.metrics: ["percentages"]
+  hosts: []
+  period: 10s
+  enabled: true
