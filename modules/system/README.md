@@ -46,7 +46,7 @@ logzio/docker-collector-metrics
 
 | Parameter | Description |
 |---|---|
-| **HOSTNAME** | Custom name of the host. <br /> **Default**: `HOSTNAME` environment variable
+| **SYSTEM_HOSTNAME** | **Default**: `HOSTNAME` environment variable <br />  custom name of the host. 
 
 
 #### 3.  Check Logz.io for your metrics
