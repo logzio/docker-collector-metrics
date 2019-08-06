@@ -49,7 +49,7 @@ def _filter_containers(conf):
 
 
 def _set_period(conf):
-    set_key_from_env(conf, "period", "DOCKER_PERIOD")
+    set_key_from_env(conf, "period", "DOCKER_PERIOD", "10s")
 
 
 def _set_certificate(conf):

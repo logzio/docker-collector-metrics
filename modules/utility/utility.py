@@ -4,12 +4,14 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def set_key_from_env(conf, key, env_name):
-    try:
-        value = os.environ[env_name]
-    except KeyError:
-        return
-
+def set_key_from_env(conf, key, env_name, default=None):
+    if default is not None:
+        value = os.getenv(env_name, default)
+    else:
+        try:
+            value = os.environ[env_name]
+        except KeyError:
+            return
     conf[key] = value
     logger.debug("Set {0} from os.environ[{1}] with {2}".format(key, env_name, value))
 

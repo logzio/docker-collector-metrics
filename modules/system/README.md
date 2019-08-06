@@ -46,7 +46,7 @@ logzio/docker-collector-metrics
 
 | Parameter | Description |
 |---|---|
-| **HOSTNAME** | Custom name of the host. <br /> **Default**: `HOSTNAME` environment variable
+| SYSTEM_PERIOD | **Default**: `10s` <br>  Sampling rate of metrics. We recommend setting this to `3s` or longer. |
 
 
 #### 3.  Check Logz.io for your metrics

@@ -16,5 +16,4 @@
     - "uptime"
   cpu.metrics: ["percentages"]
   hosts: []
-  period: 10s
   enabled: true

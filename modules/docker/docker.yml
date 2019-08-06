@@ -9,5 +9,4 @@
     - "memory"
     - "network"
   hosts: []
-  period: 10s
   enabled: true
