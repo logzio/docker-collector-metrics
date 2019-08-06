@@ -3,8 +3,10 @@ import os
 
 from ruamel.yaml import YAML
 from ..utility.utility import set_key_from_env, set_mapping_from_env
+from modules.utility.utility import get_dir_path
 
-DOCKER_YML_PATH = "{}/docker.yml".format(os.path.dirname(os.path.realpath(__file__)))
+
+DOCKER_YML_PATH = "{}/docker.yml".format(get_dir_path())
 MODULE_NAME = "docker"
 
 logger = logging.getLogger(__name__)

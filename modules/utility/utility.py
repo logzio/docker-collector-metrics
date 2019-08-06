@@ -31,3 +31,7 @@ def set_mapping_from_env(conf, key, mapping):
             return
 
     conf[key] = conf_map
+
+
+def get_dir_path():
+    return os.path.dirname(os.path.realpath(__file__))
