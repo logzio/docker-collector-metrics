@@ -13,6 +13,6 @@
     - "socket"
     - "socket_summary"
     - "uptime"
-  cpu.metrics: ["percentages"]
+  cpu.metrics: ["percentages", "normalized_percentages"]
   hosts: []
   enabled: true
