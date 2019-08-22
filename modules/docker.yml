@@ -8,5 +8,6 @@
     #- "image"
     - "memory"
     - "network"
-  hosts: []
-  enabled: true
+  period: 10s
+  hosts: ["unix:///var/run/docker.sock"]
+  enabled: false

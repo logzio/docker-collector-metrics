@@ -4,12 +4,11 @@ import socket
 import glob
 
 from ruamel.yaml import YAML
-from modules import setups
+from modules import supported_modules
 
 SOCKET_TIMEOUT = 3
 FIRST_CHAR = 0
-METRICBEAT_CONF_PATH = "/etc/metricbeat/metricbeat.yml"
-MODULES_DIR = os.environ["LOGZIO_MODULES_PATH"]
+METRICBEAT_CONF_PATH = "metricbeat.yml"
 DEFAULT_LOG_LEVEL = "INFO"
 LOG_LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 
@@ -40,32 +39,17 @@ def _is_open():
 
 
 def _add_modules():
-    if _custom_modules():
-        logger.debug("Using custom modules")
-        return
     try:
         modules = [m.strip() for m in os.environ["LOGZIO_MODULES"].split(",")]
     except KeyError:
         logger.error("Required at least one module")
         raise
 
-    _enable_modules(modules)
+    _check_valid_modules(modules)
 
-
-def _custom_modules():
-    return len(glob.glob("{}/*.yml".format(MODULES_DIR)))
-
-
-def _enable_modules(modules):
-    yaml = YAML()
-    supported_modules = dict((name, setup) for name, setup in setups)
+def _check_valid_modules(modules):
     for module in modules:
-        if module in supported_modules:
-            conf = supported_modules[module]()
-            with open("{0}/{1}{2}".format(MODULES_DIR, module, ".yml"), "w+") as conf_yaml:
-                logger.debug("Adding the following conf: {}".format(conf))
-                yaml.dump(conf, conf_yaml)
-        else:
+        if module not in supported_modules:
             logger.error("Unsupported module: {}".format(module))
             raise RuntimeError
 
@@ -77,7 +61,7 @@ def _add_shipping_data():
     with open("metricbeat.yml") as default_metricbeat_yaml:
         conf = yaml.load(default_metricbeat_yaml)
 
-    conf["output.logstash"]["hosts"].append(url)
+    conf["output.logstash"]["hosts"] = url
     conf["fields"]["token"] = token
     conf["fields"]["type"] = os.getenv("LOGZIO_TYPE", "docker-collector-metrics")
 
@@ -129,4 +113,4 @@ _is_open()
 _add_modules()
 _add_shipping_data()
 
-os.system("metricbeat -e")
+os.system("metricbeat -e -c metricbeat.yml")
