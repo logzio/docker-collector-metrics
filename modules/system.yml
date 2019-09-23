@@ -15,6 +15,5 @@
   - "socket_summary"
   - "uptime"
   cpu.metrics: ["percentages", "normalized_percentages"]
-  hosts: []
   period: 10s
   enabled: false

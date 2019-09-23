@@ -3,13 +3,14 @@ import os
 import socket
 
 from ruamel.yaml import YAML
-from modules import supported_modules
 
 SOCKET_TIMEOUT = 3
 FIRST_CHAR = 0
 METRICBEAT_CONF_PATH = "/etc/metricbeat/metricbeat.yml"
 DEFAULT_LOG_LEVEL = "INFO"
 LOG_LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+SUPPORTED_MODULES = ["docker", "system"]
+
 
 url = "{}:5015".format(os.environ.get("LOGZIO_URL", "listener.logz.io"))
 
@@ -52,7 +53,7 @@ def _enable_modules(modules):
     yaml = YAML()
     yaml.preserve_quotes = True
     for module in modules:
-        if module not in supported_modules:
+        if module not in SUPPORTED_MODULES:
             logger.error("Unsupported module: {}".format(module))
             raise RuntimeError
         with open("modules/{}.yml".format(module)) as module_file:
