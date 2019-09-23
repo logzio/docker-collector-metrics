@@ -1,16 +1,17 @@
 import logging
 import os
 import socket
-import glob
 
 from ruamel.yaml import YAML
 from modules import supported_modules
 
 SOCKET_TIMEOUT = 3
 FIRST_CHAR = 0
-METRICBEAT_CONF_PATH = "metricbeat.yml"
+METRICBEAT_CONF_PATH = "/usr/local/etc/metricbeat/metricbeat.yml"
 DEFAULT_LOG_LEVEL = "INFO"
 LOG_LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+
+url = os.environ["LOGZIO_URL"]
 
 
 def _create_logger():
@@ -44,20 +45,28 @@ def _add_modules():
     except KeyError:
         logger.error("Required at least one module")
         raise
+    _enable_modules(modules)
 
-    _check_valid_modules(modules)
 
-def _check_valid_modules(modules):
+def _enable_modules(modules):
+    yaml = YAML()
+    yaml.preserve_quotes = True
     for module in modules:
         if module not in supported_modules:
             logger.error("Unsupported module: {}".format(module))
             raise RuntimeError
+        with open("modules/{}.yml".format(module)) as module_file:
+            module_yaml = yaml.load(module_file)
+            module_yaml[0]["enabled"] = True
+        with open("modules/{}.yml".format(module), "w+") as module_file:
+            yaml.dump(module_yaml, module_file)
 
 
 def _add_shipping_data():
     token = os.environ["LOGZIO_TOKEN"]
 
     yaml = YAML()
+    yaml.preserve_quotes = True
     with open("metricbeat.yml") as default_metricbeat_yaml:
         conf = yaml.load(default_metricbeat_yaml)
 
@@ -72,7 +81,6 @@ def _add_shipping_data():
     with open(METRICBEAT_CONF_PATH, "w+") as main_metricbeat_yaml:
         logger.debug("Using the following meatricbeat configuration: {}".format(conf))
         yaml.dump(conf, main_metricbeat_yaml)
-
 
 def _get_additional_fields():
     try:
@@ -106,11 +114,9 @@ def parse_entry(entry):
     return key, value
 
 
-url = os.environ["LOGZIO_URL"]
 logger = _create_logger()
-
 _is_open()
 _add_modules()
 _add_shipping_data()
 
-os.system("metricbeat -e -c metricbeat.yml")
+os.system("metricbeat -e -d \"*\"")
