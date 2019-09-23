@@ -7,11 +7,11 @@ from modules import supported_modules
 
 SOCKET_TIMEOUT = 3
 FIRST_CHAR = 0
-METRICBEAT_CONF_PATH = "/usr/local/etc/metricbeat/metricbeat.yml"
+METRICBEAT_CONF_PATH = "/etc/metricbeat/metricbeat.yml"
 DEFAULT_LOG_LEVEL = "INFO"
 LOG_LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 
-url = os.environ["LOGZIO_URL"]
+url = os.environ.get("LOGZIO_URL", "listener.logz.io:5015")
 
 
 def _create_logger():

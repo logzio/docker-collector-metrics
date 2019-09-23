@@ -1,6 +1,6 @@
 #==========================  Modules configuration ============================
 metricbeat.config.modules:
-  path: modules/*.yml
+  path: /logzio/modules/*.yml
 
 #================================ General =====================================
 fields:
