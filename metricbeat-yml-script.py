@@ -11,7 +11,7 @@ METRICBEAT_CONF_PATH = "/etc/metricbeat/metricbeat.yml"
 DEFAULT_LOG_LEVEL = "INFO"
 LOG_LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 
-url = os.environ.get("LOGZIO_URL", "listener.logz.io:5015")
+url = "{}:5015".format(os.environ.get("LOGZIO_URL", "listener.logz.io"))
 
 
 def _create_logger():
@@ -119,4 +119,4 @@ _is_open()
 _add_modules()
 _add_shipping_data()
 
-os.system("metricbeat -e -d \"*\"")
+os.system("metricbeat -e")
