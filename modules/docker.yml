@@ -5,7 +5,6 @@
   - "diskio"
   - "healthcheck"
   - "info"
-    #- "image"
   - "memory"
   - "network"
   period: 10s

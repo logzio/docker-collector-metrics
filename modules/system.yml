@@ -4,7 +4,6 @@
   - "diskio"
   - "memory"
   - "network"
-#    - "core"
   - "filesystem"
   - "fsstat"
   - "load"
