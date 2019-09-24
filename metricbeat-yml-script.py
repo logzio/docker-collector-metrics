@@ -59,7 +59,7 @@ def _enable_modules(modules):
         with open("modules/{}.yml".format(module), "r+") as module_file:
             module_yaml = yaml.load(module_file)
             module_yaml[0]["enabled"] = True
-            yaml.dump(module_yaml, module_file):
+            yaml.dump(module_yaml, module_file)
 
 
 def _add_shipping_data():
