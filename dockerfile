@@ -3,7 +3,7 @@ FROM python:3.7-slim
 COPY requirements.txt ./requirements.txt
 
 ENV LOGZIO_DIR_PATH /logzio
-ENV LOGZIO_MODULES_PATH ${LOGZIO_DIR_PATH}/logzio_modules
+ENV LOGZIO_MODULES_PATH ${LOGZIO_DIR_PATH}/modules
 
 
 RUN apt-get update && \
@@ -17,12 +17,11 @@ RUN apt-get update && \
     rm COMODORSADomainValidationSecureServerCA.crt && \
     pip install -r requirements.txt && \
     rm requirements.txt && \
-    mkdir -p ${LOGZIO_DIR_PATH} && \
-    mkdir -p ${LOGZIO_MODULES_PATH}
+    mkdir -p ${LOGZIO_DIR_PATH}
 
-COPY modules ${LOGZIO_DIR_PATH}/modules
+COPY modules ${LOGZIO_MODULES_PATH}
 COPY metricbeat.yml ${LOGZIO_DIR_PATH}/
 COPY metricbeat-yml-script.py ${LOGZIO_DIR_PATH}/
 
 WORKDIR ${LOGZIO_DIR_PATH}
-CMD python $LOGZIO_DIR_PATH/metricbeat-yml-script.py
+CMD python metricbeat-yml-script.py

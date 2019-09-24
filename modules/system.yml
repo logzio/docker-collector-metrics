@@ -1,0 +1,18 @@
+- module: system
+  metricsets:
+  - "cpu"
+  - "diskio"
+  - "memory"
+  - "network"
+  - "filesystem"
+  - "fsstat"
+  - "load"
+  - "process"
+  - "process_summary"
+  - "raid"
+  - "socket"
+  - "socket_summary"
+  - "uptime"
+  cpu.metrics: ["percentages", "normalized_percentages"]
+  period: 10s
+  enabled: false

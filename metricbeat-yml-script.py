@@ -1,17 +1,18 @@
 import logging
 import os
 import socket
-import glob
 
 from ruamel.yaml import YAML
-from modules import setups
 
 SOCKET_TIMEOUT = 3
 FIRST_CHAR = 0
 METRICBEAT_CONF_PATH = "/etc/metricbeat/metricbeat.yml"
-MODULES_DIR = os.environ["LOGZIO_MODULES_PATH"]
 DEFAULT_LOG_LEVEL = "INFO"
 LOG_LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+SUPPORTED_MODULES = ["docker", "system"]
+
+
+url = "{}:5015".format(os.environ.get("LOGZIO_URL", "listener.logz.io"))
 
 
 def _create_logger():
@@ -40,44 +41,36 @@ def _is_open():
 
 
 def _add_modules():
-    if _custom_modules():
-        logger.debug("Using custom modules")
-        return
     try:
         modules = [m.strip() for m in os.environ["LOGZIO_MODULES"].split(",")]
     except KeyError:
         logger.error("Required at least one module")
         raise
-
     _enable_modules(modules)
-
-
-def _custom_modules():
-    return len(glob.glob("{}/*.yml".format(MODULES_DIR)))
 
 
 def _enable_modules(modules):
     yaml = YAML()
-    supported_modules = dict((name, setup) for name, setup in setups)
+    yaml.preserve_quotes = True
     for module in modules:
-        if module in supported_modules:
-            conf = supported_modules[module]()
-            with open("{0}/{1}{2}".format(MODULES_DIR, module, ".yml"), "w+") as conf_yaml:
-                logger.debug("Adding the following conf: {}".format(conf))
-                yaml.dump(conf, conf_yaml)
-        else:
+        if module not in SUPPORTED_MODULES:
             logger.error("Unsupported module: {}".format(module))
             raise RuntimeError
+        with open("modules/{}.yml".format(module), "r+") as module_file:
+            module_yaml = yaml.load(module_file)
+            module_yaml[0]["enabled"] = True
+            yaml.dump(module_yaml, module_file)
 
 
 def _add_shipping_data():
     token = os.environ["LOGZIO_TOKEN"]
 
     yaml = YAML()
+    yaml.preserve_quotes = True
     with open("metricbeat.yml") as default_metricbeat_yaml:
         conf = yaml.load(default_metricbeat_yaml)
 
-    conf["output.logstash"]["hosts"].append(url)
+    conf["output.logstash"]["hosts"] = url
     conf["fields"]["token"] = token
     conf["fields"]["type"] = os.getenv("LOGZIO_TYPE", "docker-collector-metrics")
 
@@ -88,7 +81,6 @@ def _add_shipping_data():
     with open(METRICBEAT_CONF_PATH, "w+") as main_metricbeat_yaml:
         logger.debug("Using the following meatricbeat configuration: {}".format(conf))
         yaml.dump(conf, main_metricbeat_yaml)
-
 
 def _get_additional_fields():
     try:
@@ -122,9 +114,7 @@ def parse_entry(entry):
     return key, value
 
 
-url = os.environ["LOGZIO_URL"]
 logger = _create_logger()
-
 _is_open()
 _add_modules()
 _add_shipping_data()
