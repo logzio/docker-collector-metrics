@@ -56,11 +56,10 @@ def _enable_modules(modules):
         if module not in SUPPORTED_MODULES:
             logger.error("Unsupported module: {}".format(module))
             raise RuntimeError
-        with open("modules/{}.yml".format(module)) as module_file:
+        with open("modules/{}.yml".format(module), "r+") as module_file:
             module_yaml = yaml.load(module_file)
             module_yaml[0]["enabled"] = True
-        with open("modules/{}.yml".format(module), "w+") as module_file:
-            yaml.dump(module_yaml, module_file)
+            yaml.dump(module_yaml, module_file):
 
 
 def _add_shipping_data():
