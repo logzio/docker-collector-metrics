@@ -25,7 +25,7 @@ For a complete list of options, see the parameters below the code block.👇
 ```shell
 docker run --name docker-collector-metrics \
 --env LOGZIO_TOKEN="<ACCOUNT-TOKEN>" \
---env LOGZIO_URL="<LISTENER-URL>:5015" \
+--env LOGZIO_URL="<LISTENER-URL>" \
 --env LOGZIO_MODULES="<COLLECTED-MODULES>" \
 logzio/docker-collector-metrics
 ```
