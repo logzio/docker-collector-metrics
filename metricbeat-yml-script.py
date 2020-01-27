@@ -1,7 +1,6 @@
 import logging
 import os
 import socket
-
 from ruamel.yaml import YAML
 
 SOCKET_TIMEOUT = 3
@@ -9,7 +8,7 @@ FIRST_CHAR = 0
 METRICBEAT_CONF_PATH = "/etc/metricbeat/metricbeat.yml"
 DEFAULT_LOG_LEVEL = "INFO"
 LOG_LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
-SUPPORTED_MODULES = ["docker", "system"]
+SUPPORTED_MODULES = ["docker", "system", "aws"]
 
 
 url = "{}:5015".format(os.environ.get("LOGZIO_URL", "listener.logz.io"))
@@ -47,6 +46,7 @@ def _add_modules():
         logger.error("Required at least one module")
         raise
     _enable_modules(modules)
+    _add_data_by_module(modules)
 
 
 def _enable_modules(modules):
@@ -58,8 +58,12 @@ def _enable_modules(modules):
             raise RuntimeError
         with open("modules/{}.yml".format(module), "r+") as module_file:
             module_yaml = yaml.load(module_file)
-            module_yaml[0]["enabled"] = True
+            for conf in module_yaml:
+                conf["enabled"] = True
+            module_file.seek(0)
             yaml.dump(module_yaml, module_file)
+            module_file.truncate()
+            module_file.close()
 
 
 def _add_shipping_data():
@@ -82,6 +86,7 @@ def _add_shipping_data():
         logger.debug("Using the following meatricbeat configuration: {}".format(conf))
         yaml.dump(conf, main_metricbeat_yaml)
 
+
 def _get_additional_fields():
     try:
         additional_fields = os.environ["LOGZIO_ADDITIONAL_FIELDS"]
@@ -99,7 +104,6 @@ def _get_additional_fields():
                 fields[key] = "Error parsing environment variable"
         else:
             fields[key] = value
-
     return fields
 
 
@@ -112,6 +116,34 @@ def parse_entry(entry):
     if key == "" or value == "":
         raise ValueError("Failed to parse entry: {}".format(entry))
     return key, value
+
+
+def _add_data_by_module(modules):
+    for module in modules:
+        if module.lower() == "aws":
+            _add_aws_shipping_data()
+
+
+def _add_aws_shipping_data():
+    try:
+        access_key_id = os.environ["AWS_ACCESS_KEY"]
+        access_key = os.environ["AWS_SECRET_KEY"]
+        aws_region = os.environ["AWS_REGION"]
+        yaml = YAML()
+        yaml.preserve_quotes = True
+
+        with open("modules/aws.yml", "r+") as module_file:
+            module_yaml = yaml.load(module_file)
+            for conf in module_yaml:
+                conf["access_key_id"] = access_key_id
+                conf["secret_access_key"] = access_key
+                conf["default_region"] = aws_region
+            module_file.seek(0)
+            yaml.dump(module_yaml, module_file)
+            module_file.truncate()
+            module_file.close()
+    except KeyError:
+        logger.error("Could not find aws access key or secret key or region: {}".format(KeyError))
 
 
 logger = _create_logger()

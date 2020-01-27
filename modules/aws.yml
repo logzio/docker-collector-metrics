@@ -1,0 +1,16 @@
+- module: aws
+  period: 300s
+  metricsets:
+    - ec2
+    - cloudwatch
+  cloudwatch_metrics:
+    - namespace: AWS/Lambda
+  enabled: false
+- module: aws
+  period: 60s
+  metricsets:
+    - cloudwatch
+  cloudwatch_metrics:
+    - namespace: AWS/Kinesis
+    - namespace: AWS/Firehose
+  enabled: false
