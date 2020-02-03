@@ -58,8 +58,7 @@ def _enable_modules(modules):
             raise RuntimeError
         with open("modules/{}.yml".format(module), "r+") as module_file:
             module_yaml = yaml.load(module_file)
-            for conf in module_yaml:
-                conf["enabled"] = True
+            module_yaml[0]["enabled"] = True
             module_file.seek(0)
             yaml.dump(module_yaml, module_file)
             module_file.truncate()
@@ -125,25 +124,41 @@ def _add_data_by_module(modules):
 
 
 def _add_aws_shipping_data():
-    try:
-        access_key_id = os.environ["AWS_ACCESS_KEY"]
-        access_key = os.environ["AWS_SECRET_KEY"]
-        aws_region = os.environ["AWS_REGION"]
-        yaml = YAML()
-        yaml.preserve_quotes = True
+    aws_namespaces = _get_aws_namespaces()
+    if len(aws_namespaces) > 0:
+        try:
+            access_key_id = os.environ["AWS_ACCESS_KEY"]
+            access_key = os.environ["AWS_SECRET_KEY"]
+            aws_region = os.environ["AWS_REGION"]
+            yaml = YAML()
+            yaml.preserve_quotes = False
 
-        with open("modules/aws.yml", "r+") as module_file:
-            module_yaml = yaml.load(module_file)
-            for conf in module_yaml:
-                conf["access_key_id"] = access_key_id
-                conf["secret_access_key"] = access_key
-                conf["default_region"] = aws_region
-            module_file.seek(0)
-            yaml.dump(module_yaml, module_file)
-            module_file.truncate()
-            module_file.close()
+            with open("modules/aws.yml", "r+") as module_file:
+                module_yaml = yaml.load(module_file)
+                module_yaml[0]["metrics"] = []
+                for aws_namespace in aws_namespaces:
+                    module_yaml[0]["metrics"].append(dict(namespace="{}".format(aws_namespace)))
+                    if aws_namespace.lower() == "aws/lambda":
+                        module_yaml[0]["metrics"][-1]["tags.resource_type_filter"] = "lambda"
+                module_yaml[0]["access_key_id"] = access_key_id
+                module_yaml[0]["secret_access_key"] = access_key
+                module_yaml[0]["default_region"] = aws_region
+                module_file.seek(0)
+                yaml.dump(module_yaml, module_file)
+                module_file.truncate()
+                module_file.close()
+        except KeyError:
+            logger.error("Could not find aws access key or secret key or region: {}".format(KeyError))
+
+
+def _get_aws_namespaces():
+    aws_namespaces = []
+
+    try:
+        aws_namespaces = os.environ["AWS_NAMESPACES"].split(',')
     except KeyError:
-        logger.error("Could not find aws access key or secret key or region: {}".format(KeyError))
+        logger.error("Could not find aws services: {}".format(KeyError))
+    return aws_namespaces
 
 
 logger = _create_logger()
