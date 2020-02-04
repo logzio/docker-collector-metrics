@@ -61,10 +61,6 @@ def _enable_modules(modules):
             module_yaml = yaml.load(module_file)
             module_yaml[SINGLE_MODULE_INDEX]["enabled"] = True
             _dump_and_close_file(yaml, module_yaml, module_file)
-            # module_file.seek(0)
-            # yaml.dump(module_yaml, module_file)
-            # module_file.truncate()
-            # module_file.close()
 
 
 def _add_shipping_data():
@@ -146,10 +142,6 @@ def _add_aws_shipping_data():
                 module_yaml[SINGLE_MODULE_INDEX]["secret_access_key"] = access_key
                 module_yaml[SINGLE_MODULE_INDEX]["default_region"] = aws_region
                 _dump_and_close_file(yaml, module_yaml, module_file)
-                # module_file.seek(0)
-                # yaml.dump(module_yaml, module_file)
-                # module_file.truncate()
-                # module_file.close()
         except KeyError:
             logger.error("Could not find aws access key or secret key or region: {}".format(KeyError))
 
