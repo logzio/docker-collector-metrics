@@ -60,7 +60,7 @@ def _enable_modules(modules):
         with open("modules/{}.yml".format(module), "r+") as module_file:
             module_yaml = yaml.load(module_file)
             module_yaml[SINGLE_MODULE_INDEX]["enabled"] = True
-            _dump_and_close_file(yaml, module_yaml, module_file)
+            _dump_and_close_file(module_yaml, module_file)
 
 
 def _add_shipping_data():
@@ -129,7 +129,7 @@ def _add_aws_shipping_data():
             access_key = os.environ["AWS_SECRET_KEY"]
             aws_region = os.environ["AWS_REGION"]
             yaml = YAML()
-            yaml.preserve_quotes = False
+            yaml.preserve_quotes = True
 
             with open("modules/aws.yml", "r+") as module_file:
                 module_yaml = yaml.load(module_file)
@@ -141,7 +141,7 @@ def _add_aws_shipping_data():
                 module_yaml[SINGLE_MODULE_INDEX]["access_key_id"] = access_key_id
                 module_yaml[SINGLE_MODULE_INDEX]["secret_access_key"] = access_key
                 module_yaml[SINGLE_MODULE_INDEX]["default_region"] = aws_region
-                _dump_and_close_file(yaml, module_yaml, module_file)
+                _dump_and_close_file(module_yaml, module_file)
         except KeyError:
             logger.error("Could not find aws access key or secret key or region: {}".format(KeyError))
 
@@ -156,7 +156,9 @@ def _get_aws_namespaces():
     return aws_namespaces
 
 
-def _dump_and_close_file(yaml, module_yaml, module_file):
+def _dump_and_close_file(module_yaml, module_file):
+    yaml = YAML()
+    yaml.preserve_quotes = True
     module_file.seek(0)
     yaml.dump(module_yaml, module_file)
     module_file.truncate()
