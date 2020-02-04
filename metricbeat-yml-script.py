@@ -9,6 +9,7 @@ METRICBEAT_CONF_PATH = "/etc/metricbeat/metricbeat.yml"
 DEFAULT_LOG_LEVEL = "INFO"
 LOG_LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 SUPPORTED_MODULES = ["docker", "system", "aws"]
+SINGLE_MODULE_INDEX = 0
 
 
 url = "{}:5015".format(os.environ.get("LOGZIO_URL", "listener.logz.io"))
@@ -58,11 +59,12 @@ def _enable_modules(modules):
             raise RuntimeError
         with open("modules/{}.yml".format(module), "r+") as module_file:
             module_yaml = yaml.load(module_file)
-            module_yaml[0]["enabled"] = True
-            module_file.seek(0)
-            yaml.dump(module_yaml, module_file)
-            module_file.truncate()
-            module_file.close()
+            module_yaml[SINGLE_MODULE_INDEX]["enabled"] = True
+            _dump_and_close_file(yaml, module_yaml, module_file)
+            # module_file.seek(0)
+            # yaml.dump(module_yaml, module_file)
+            # module_file.truncate()
+            # module_file.close()
 
 
 def _add_shipping_data():
@@ -135,18 +137,19 @@ def _add_aws_shipping_data():
 
             with open("modules/aws.yml", "r+") as module_file:
                 module_yaml = yaml.load(module_file)
-                module_yaml[0]["metrics"] = []
+                module_yaml[SINGLE_MODULE_INDEX]["metrics"] = []
                 for aws_namespace in aws_namespaces:
-                    module_yaml[0]["metrics"].append(dict(namespace="{}".format(aws_namespace)))
+                    module_yaml[SINGLE_MODULE_INDEX]["metrics"].append({"namespace": aws_namespace})
                     if aws_namespace.lower() == "aws/lambda":
-                        module_yaml[0]["metrics"][-1]["tags.resource_type_filter"] = "lambda"
-                module_yaml[0]["access_key_id"] = access_key_id
-                module_yaml[0]["secret_access_key"] = access_key
-                module_yaml[0]["default_region"] = aws_region
-                module_file.seek(0)
-                yaml.dump(module_yaml, module_file)
-                module_file.truncate()
-                module_file.close()
+                        module_yaml[SINGLE_MODULE_INDEX]["metrics"][-1]["tags.resource_type_filter"] = "lambda"
+                module_yaml[SINGLE_MODULE_INDEX]["access_key_id"] = access_key_id
+                module_yaml[SINGLE_MODULE_INDEX]["secret_access_key"] = access_key
+                module_yaml[SINGLE_MODULE_INDEX]["default_region"] = aws_region
+                _dump_and_close_file(yaml, module_yaml, module_file)
+                # module_file.seek(0)
+                # yaml.dump(module_yaml, module_file)
+                # module_file.truncate()
+                # module_file.close()
         except KeyError:
             logger.error("Could not find aws access key or secret key or region: {}".format(KeyError))
 
@@ -159,6 +162,13 @@ def _get_aws_namespaces():
     except KeyError:
         logger.error("Could not find aws services: {}".format(KeyError))
     return aws_namespaces
+
+
+def _dump_and_close_file(yaml, module_yaml, module_file):
+    module_file.seek(0)
+    yaml.dump(module_yaml, module_file)
+    module_file.truncate()
+    module_file.close()
 
 
 logger = _create_logger()
