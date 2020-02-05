@@ -61,9 +61,11 @@ Run the docker. Give your metrics a few minutes to get from your system to ours,
 
 ## Change log
 
- - **0.0.5**: 
+ - **0.0.6**:
     - Upgraded to metricbeat 7.5.2.
     - Added AWS module.
+ - **0.0.5**: 
+    - Added docker module.
  - **0.0.4**: 
     - Refactor the image to use default Metricbeat yamls.
  - **0.0.3**: BREAKING CHANGES:
