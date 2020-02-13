@@ -39,7 +39,7 @@ logzio/docker-collector-metrics
 | **LOGZIO_TYPE** | **Default**: `docker-collector-metrics` <br /> Logz.io type you'll use with this Docker. This is shown in your logs under the `type` field in Kibana. Logz.io applies parsing based on type. |
 | **LOGZIO_LOG_LEVEL** | **Default**: `"INFO"` <br /> The log level the scripts will use|
 | **LOGZIO_MODULES** | **Required** The Meatricbeat modules we will use for this container separated by ',' delimiter, formatted as "module1,module2,module3". Currently we support these modules: `system`, `docker`, `aws`. <br /> For further information on supported modules, please see the Supported modules section. <br />If you want to use your custom module configurations or use modules that we are yet to support, you need to mount the module files to `/logzio/modules` |
-| **LOGZIO_ADDITIONAL_FIELDS** | include additional fields with every message sent, formatted as "fieldName1=fieldValue1;fieldName2=fieldValue2". To use an environment variable, format as "fieldName1=fieldValue1;fieldName2=$ENV_VAR_NAME". In that case, the environment variable should be the only value in the field. If the environment variable can’t be resolved, the field is omitted.|
+| **LOGZIO_EXTRA_DIMENSIONS** | include additional fields with every message sent, formatted as "fieldName1=fieldValue1;fieldName2=fieldValue2". To use an environment variable, format as "fieldName1=fieldValue1;fieldName2=$ENV_VAR_NAME". In that case, the environment variable should be the only value in the field. If the environment variable can’t be resolved, the field is omitted.|
 
 <!-- todo list of supported modules -->
 
@@ -61,9 +61,10 @@ Run the docker. Give your metrics a few minutes to get from your system to ours,
 
 ## Change log
 
- - **0.0.6**:
+ - **0.1.0**:
     - Upgraded to metricbeat 7.5.2.
     - Added AWS module.
+    - Renamed `LOGZIO_ADDITIONAL_FIELDS` to `LOGZIO_EXTRA_DIMENSIONS`. Dimensions will arrive under `dim`.
  - **0.0.5**: 
     - Added docker module.
  - **0.0.4**: 

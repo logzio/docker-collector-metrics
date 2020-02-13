@@ -76,8 +76,10 @@ def _add_shipping_data():
     conf["fields"]["type"] = os.getenv("LOGZIO_TYPE", "docker-collector-metrics")
 
     additional_field = _get_additional_fields()
+    if len(additional_field) > 0:
+        conf["fields"]["dim"] = {}
     for key in additional_field:
-        conf["fields"][key] = additional_field[key]
+        conf["fields"]["dim"][key] = additional_field[key]
 
     with open(METRICBEAT_CONF_PATH, "w+") as main_metricbeat_yaml:
         logger.debug("Using the following meatricbeat configuration: {}".format(conf))
@@ -86,7 +88,7 @@ def _add_shipping_data():
 
 def _get_additional_fields():
     try:
-        additional_fields = os.environ["LOGZIO_ADDITIONAL_FIELDS"]
+        additional_fields = os.environ["LOGZIO_EXTRA_DIMENSIONS"]
     except KeyError:
         return {}
 
