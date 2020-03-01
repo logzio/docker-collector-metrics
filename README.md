@@ -63,8 +63,9 @@ Run the docker. Give your metrics a few minutes to get from your system to ours,
 
  - **0.1.0**:
     - Upgraded to metricbeat 7.5.2.
-    - Added AWS module.
     - Renamed `LOGZIO_ADDITIONAL_FIELDS` to `LOGZIO_EXTRA_DIMENSIONS`. Dimensions will arrive under `dim`.
+    - Deprecated `LOGZIO_URL`. We are now supporting `LOGZIO_REGION`.
+    - Added AWS module.
  - **0.0.5**: 
     - Added docker module.
  - **0.0.4**: 

@@ -10,9 +10,40 @@ DEFAULT_LOG_LEVEL = "INFO"
 LOG_LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 SUPPORTED_MODULES = ["docker", "system", "aws"]
 SINGLE_MODULE_INDEX = 0
+LOGZIO_LISTENER_ADDRESS = "listener.logz.io:5015"
 
 
-url = "{}:5015".format(os.environ.get("LOGZIO_URL", "listener.logz.io"))
+url = LOGZIO_LISTENER_ADDRESS
+
+
+def get_listener_url(region):
+    return LOGZIO_LISTENER_ADDRESS.replace("listener.", "listener{}.".format(get_region_code(region)))
+
+
+def get_region_code(region):
+    if region != "us" and region != "":
+        return "-{}".format(region)
+    return ""
+
+
+def _set_url():
+    global url
+    region = ""
+    is_region = False
+    if 'LOGZIO_REGION' in os.environ:
+        region = os.environ['LOGZIO_REGION']
+        is_region = True
+        if 'LOGZIO_URL' in os.environ:
+            logger.warning("Both LOGZIO_REGION and LOGZIO_URL were entered! Using LOGZIO_REGION variable.")
+    else:
+        if 'LOGZIO_URL' in os.environ and os.environ['LOGZIO_URL'] != "":
+            url = "{}:5015".format(os.environ['LOGZIO_URL'])
+            logger.warning("Please note that LOGZIO_URL is deprecated!")
+        else:
+            is_region = True
+
+    if is_region:
+        url = get_listener_url(region)
 
 
 def _create_logger():
@@ -168,6 +199,7 @@ def _dump_and_close_file(module_yaml, module_file):
 
 
 logger = _create_logger()
+_set_url()
 _is_open()
 _add_modules()
 _add_shipping_data()
