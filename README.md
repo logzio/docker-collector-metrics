@@ -146,7 +146,7 @@ You'll need this for your Metricbeat configuration later.
 ### System module
 
 For the system module,
-you'll need to include `aws` in the `LOGZIO_MODULES` environment variable.
+you'll need to include `system` in the `LOGZIO_MODULES` environment variable.
 
 For example:
 
