@@ -21,6 +21,11 @@ docker pull logzio/docker-collector-metrics
 
 ### 2. Run the container
 
+You'll set your configuration using environment variables
+in the `docker run` command.
+Each parameter is formatted like this:
+`--env ENV_VARIABLE_NAME="value"`.
+
 For a complete list of options, see the parameters below the code block
 and in the [_Modules_](#modules) section at the bottom of this doc. 👇
 
