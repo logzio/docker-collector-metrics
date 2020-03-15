@@ -32,7 +32,6 @@ and in the [_Modules_](#modules) section at the bottom of this doc. 👇
 ```shell
 docker run --name docker-collector-metrics \
 --env LOGZIO_TOKEN="<<SHIPPING-TOKEN>>" \
---env LOGZIO_URL="<<LISTENER-HOST>>" \
 --env LOGZIO_MODULES="<<MODULES>>" \
 logzio/docker-collector-metrics
 ```
@@ -75,7 +74,6 @@ For example:
 ```shell
 docker run --name docker-collector-metrics \
 --env LOGZIO_TOKEN="<<SHIPPING-TOKEN>>" \
---env LOGZIO_URL="<<LISTENER-HOST>>" \
 --env LOGZIO_MODULES="docker" \
 -v /var/run/docker.sock:/var/run/docker.sock:ro \
 logzio/docker-collector-metrics
@@ -102,7 +100,6 @@ For example:
 ```shell
 docker run --name docker-collector-metrics \
 --env LOGZIO_TOKEN="<<SHIPPING-TOKEN>>" \
---env LOGZIO_URL="<<LISTENER-HOST>>" \
 --env LOGZIO_MODULES="aws" \
 logzio/docker-collector-metrics
 ```
@@ -147,7 +144,6 @@ For example:
 ```shell
 docker run --name docker-collector-metrics \
 --env LOGZIO_TOKEN="<<SHIPPING-TOKEN>>" \
---env LOGZIO_URL="<<LISTENER-HOST>>" \
 --env LOGZIO_MODULES="system" \
 logzio/docker-collector-metrics
 ```
