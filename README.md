@@ -101,6 +101,10 @@ For example:
 docker run --name docker-collector-metrics \
 --env LOGZIO_TOKEN="<<SHIPPING-TOKEN>>" \
 --env LOGZIO_MODULES="aws" \
+--env AWS_ACCESS_KEY="<<ACCESS-KEY>>" \
+--env AWS_SECRET_KEY="<<SECRET-KEY>>" \
+--env AWS_REGION="<<AWS-REGION>>" \
+--env AWS_NAMESPACES="<<NAMESPACES>>" \
 logzio/docker-collector-metrics
 ```
 
