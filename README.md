@@ -52,17 +52,6 @@ in the [_Modules_](#modules) section at the bottom of this doc.
 | LOGZIO_LOG_LEVEL (Default: `"INFO"`) | The log level the module startup scripts will generate. |
 | LOGZIO_EXTRA_DIMENSIONS | Semicolon-separated list of dimensions to be included with your metrics (formatted as `dimensionName1=value1;dimensionName2=value2`). <br> To use an environment variable as a value, format as `dimensionName=$ENV_VAR_NAME`. Environment variables must be the only value in the field. If an environment variable can't be resolved, the field is omitted. |
 
-<!-- #### Supported modules:
-
-| Module | Environment Parameter | Description |
-|---|---|---|
-| **AWS** | **AWS_ACCESS_KEY** | **Required**. Your AWS account access key ID. |
-| | **AWS_SECRET_KEY** | **Required**. Your AWS secret key that matches to the above access key. |
-| | **AWS_REGION** | **Required**. Your AWS account region (for example, `us-east-1`). For more information on finding your account's region, see [AWS regions](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html) |
-| | **AWS_NAMESPACES** | **Required**. The namespaces of the services you wish to receive metrics from, as specified on [AWS docs](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html) (for example, `AWS/EC2`). |
-| **Docker** | | **Required**: Mount docker.sock to the container itself by adding `-v /var/run/docker.sock:/var/run/docker.sock:ro` to the run command. |
-| **System** | | | -->
-
 ### 3. Check Logz.io for your metrics
 
 Give your metrics a few minutes to get from your system to ours,
