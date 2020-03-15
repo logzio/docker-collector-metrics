@@ -136,7 +136,7 @@ You'll need this for your Metricbeat configuration later.
 | AWS_ACCESS_KEY (Required) | Your IAM user's access key ID. |
 | AWS_SECRET_KEY (Required) | Your IAM user's secret key. |
 | AWS_REGION (Required) | Your region's slug. You can find this in the AWS region menu (in the top menu, to the right). |
-| AWS_NAMESPACES (Required) | The namespaces of the metrics you want to collect. <br> You can find a complete list of namespaces at [_AWS Services That Publish CloudWatch Metrics_](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html) |
+| AWS_NAMESPACES (Required) | Comma-separated list of namespaces of the metrics you want to collect. <br> You can find a complete list of namespaces at [_AWS Services That Publish CloudWatch Metrics_](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html) |
 
 ### System module
 
