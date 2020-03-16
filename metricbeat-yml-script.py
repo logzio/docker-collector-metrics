@@ -1,7 +1,6 @@
 import logging
 import os
 import socket
-
 from ruamel.yaml import YAML
 
 SOCKET_TIMEOUT = 3
@@ -9,10 +8,42 @@ FIRST_CHAR = 0
 METRICBEAT_CONF_PATH = "/etc/metricbeat/metricbeat.yml"
 DEFAULT_LOG_LEVEL = "INFO"
 LOG_LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
-SUPPORTED_MODULES = ["docker", "system"]
+SUPPORTED_MODULES = ["docker", "system", "aws"]
+SINGLE_MODULE_INDEX = 0
+LOGZIO_LISTENER_ADDRESS = "listener.logz.io:5015"
 
 
-url = "{}:5015".format(os.environ.get("LOGZIO_URL", "listener.logz.io"))
+url = LOGZIO_LISTENER_ADDRESS
+
+
+def get_listener_url(region):
+    return LOGZIO_LISTENER_ADDRESS.replace("listener.", "listener{}.".format(get_region_code(region)))
+
+
+def get_region_code(region):
+    if region != "us" and region != "":
+        return "-{}".format(region)
+    return ""
+
+
+def _set_url():
+    global url
+    region = ""
+    is_region = False
+    if 'LOGZIO_REGION' in os.environ:
+        region = os.environ['LOGZIO_REGION']
+        is_region = True
+        if 'LOGZIO_URL' in os.environ:
+            logger.warning("Both LOGZIO_REGION and LOGZIO_URL were entered! Using LOGZIO_REGION variable.")
+    else:
+        if 'LOGZIO_URL' in os.environ and os.environ['LOGZIO_URL'] != "":
+            url = "{}:5015".format(os.environ['LOGZIO_URL'])
+            logger.warning("Please note that LOGZIO_URL is deprecated!")
+        else:
+            is_region = True
+
+    if is_region:
+        url = get_listener_url(region)
 
 
 def _create_logger():
@@ -47,6 +78,7 @@ def _add_modules():
         logger.error("Required at least one module")
         raise
     _enable_modules(modules)
+    _add_data_by_module(modules)
 
 
 def _enable_modules(modules):
@@ -58,8 +90,8 @@ def _enable_modules(modules):
             raise RuntimeError
         with open("modules/{}.yml".format(module), "r+") as module_file:
             module_yaml = yaml.load(module_file)
-            module_yaml[0]["enabled"] = True
-            yaml.dump(module_yaml, module_file)
+            module_yaml[SINGLE_MODULE_INDEX]["enabled"] = True
+            _dump_and_close_file(module_yaml, module_file)
 
 
 def _add_shipping_data():
@@ -75,16 +107,19 @@ def _add_shipping_data():
     conf["fields"]["type"] = os.getenv("LOGZIO_TYPE", "docker-collector-metrics")
 
     additional_field = _get_additional_fields()
+    if len(additional_field) > 0:
+        conf["fields"]["dim"] = {}
     for key in additional_field:
-        conf["fields"][key] = additional_field[key]
+        conf["fields"]["dim"][key] = additional_field[key]
 
     with open(METRICBEAT_CONF_PATH, "w+") as main_metricbeat_yaml:
         logger.debug("Using the following meatricbeat configuration: {}".format(conf))
         yaml.dump(conf, main_metricbeat_yaml)
 
+
 def _get_additional_fields():
     try:
-        additional_fields = os.environ["LOGZIO_ADDITIONAL_FIELDS"]
+        additional_fields = os.environ["LOGZIO_EXTRA_DIMENSIONS"]
     except KeyError:
         return {}
 
@@ -99,7 +134,6 @@ def _get_additional_fields():
                 fields[key] = "Error parsing environment variable"
         else:
             fields[key] = value
-
     return fields
 
 
@@ -114,7 +148,58 @@ def parse_entry(entry):
     return key, value
 
 
+def _add_data_by_module(modules):
+    for module in modules:
+        if module.lower() == "aws":
+            _add_aws_shipping_data()
+
+
+def _add_aws_shipping_data():
+    aws_namespaces = _get_aws_namespaces()
+    if len(aws_namespaces) > 0:
+        try:
+            access_key_id = os.environ["AWS_ACCESS_KEY"]
+            access_key = os.environ["AWS_SECRET_KEY"]
+            aws_region = os.environ["AWS_REGION"]
+            yaml = YAML()
+            yaml.preserve_quotes = True
+
+            with open("modules/aws.yml", "r+") as module_file:
+                module_yaml = yaml.load(module_file)
+                module_yaml[SINGLE_MODULE_INDEX]["metrics"] = []
+                for aws_namespace in aws_namespaces:
+                    module_yaml[SINGLE_MODULE_INDEX]["metrics"].append({"namespace": aws_namespace})
+                    if aws_namespace.lower() == "aws/lambda":
+                        module_yaml[SINGLE_MODULE_INDEX]["metrics"][-1]["tags.resource_type_filter"] = "lambda"
+                module_yaml[SINGLE_MODULE_INDEX]["access_key_id"] = access_key_id
+                module_yaml[SINGLE_MODULE_INDEX]["secret_access_key"] = access_key
+                module_yaml[SINGLE_MODULE_INDEX]["default_region"] = aws_region
+                _dump_and_close_file(module_yaml, module_file)
+        except KeyError:
+            logger.error("Could not find aws access key or secret key or region: {}".format(KeyError))
+
+
+def _get_aws_namespaces():
+    aws_namespaces = []
+
+    try:
+        aws_namespaces = os.environ["AWS_NAMESPACES"].split(',')
+    except KeyError:
+        logger.error("Could not find aws services: {}".format(KeyError))
+    return aws_namespaces
+
+
+def _dump_and_close_file(module_yaml, module_file):
+    yaml = YAML()
+    yaml.preserve_quotes = True
+    module_file.seek(0)
+    yaml.dump(module_yaml, module_file)
+    module_file.truncate()
+    module_file.close()
+
+
 logger = _create_logger()
+_set_url()
 _is_open()
 _add_modules()
 _add_shipping_data()

@@ -1,18 +1,19 @@
-# docker-collector-metrics
+# Docker Metrics Collector
 
-docker-collector-metrics is a Docker container that uses Metricbeat to collect metrics and forward those metrics to your Logz.io account.
+To simplify shipping metrics from one or many sources,
+we created Docker Metrics Collector.
+Docker Metrics Collector is a container
+that runs Metricbeat with the modules you enable at runtime.
 
-To use this container, you'll set environment variables in your docker run command.
-docker-collector-metrics uses those environment variables to specify which Metricbeat modules you want to be collected.
-docker-collector-metrics mounts docker.sock to the container itself, allowing Metricbeat to collect the metrics and metadata.
+Docker Metrics Collector ships metrics only.
+If you want to ship logs to Logz.io,
+see [docker-collector-logs](https://github.com/logzio/docker-collector-logs).
 
-docker-collector-metrics ships metrics only. If you want to ship logs to Logz.io, see [docker-collector-logs](https://github.com/logzio/docker-collector-logs).
-
-## docker-collector-metrics setup
+## Configuration
 
 ### 1. Pull the Docker image
 
-Download the logzio/docker-collector-metrics image:
+Download the Docker Metrics Collector image:
 
 ```shell
 docker pull logzio/docker-collector-metrics
@@ -20,34 +21,146 @@ docker pull logzio/docker-collector-metrics
 
 ### 2. Run the container
 
-For a complete list of options, see the parameters below the code block.👇
+You'll set your configuration using environment variables
+in the `docker run` command.
+Each parameter is formatted like this:
+`--env ENV_VARIABLE_NAME="value"`.
+
+For a complete list of options, see the parameters below the code block
+and in the [_Modules_](#modules) section at the bottom of this doc. 👇
 
 ```shell
 docker run --name docker-collector-metrics \
---env LOGZIO_TOKEN="<ACCOUNT-TOKEN>" \
---env LOGZIO_URL="<LISTENER-URL>" \
---env LOGZIO_MODULES="<COLLECTED-MODULES>" \
+--env LOGZIO_TOKEN="<<SHIPPING-TOKEN>>" \
+--env LOGZIO_MODULES="<<MODULES>>" \
 logzio/docker-collector-metrics
 ```
 
-#### Parameters
+**Note**:
+Documentation for specific modules is covered
+in the [_Modules_](#modules) section at the bottom of this doc.
+
+#### Parameters for all modules
 
 | Parameter | Description |
 |---|---|
-| **LOGZIO_TOKEN** | **Required**. Your Logz.io account token. Replace `<ACCOUNT-TOKEN>` with the [token](https://app.logz.io/#/dashboard/settings/general) of the account you want to ship to. |
-| **LOGZIO_URL** | **Default**: listener.logz.io <br /> Logz.io listener URL to ship the metrics to. For more information on finding your account's region, see [Account region](https://docs.logz.io/user-guide/accounts/account-region.html).|
-| **LOGZIO_TYPE** | **Default**: `docker-collector-metrics` <br /> Logz.io type you'll use with this Docker. This is shown in your logs under the `type` field in Kibana. Logz.io applies parsing based on type. |
-| **LOGZIO_LOG_LEVEL** | **Default**: `"INFO"` <br /> The log level the scripts will use|
-| **LOGZIO_MODULES** | **Required** The Meatricbeat modules we will use for this container separated by ',' delimiter, formatted as "module1,module2,module3". Current we support these modules: `system`, `docker` <br /> If you specify the `docker` module, you'll have to mounts docker.sock to the container itself by adding `-v /var/run/docker.sock:/var/run/docker.sock:ro` to the run command. <br /> If you want to use your custom module configurations or use modules that we are yet to support, you need to mount the module files to `/logzio/modules`|
-| **LOGZIO_ADDITIONAL_FIELDS** | include additional fields with every message sent, formatted as "fieldName1=fieldValue1;fieldName2=fieldValue2". To use an environment variable, format as "fieldName1=fieldValue1;fieldName2=$ENV_VAR_NAME". In that case, the environment variable should be the only value in the field. If the environment variable can’t be resolved, the field is omitted.|
-
-<!-- todo list of supported modules -->
+| LOGZIO_TOKEN (Required) | Your Logz.io account token. Replace `<<SHIPPING-TOKEN>>` with the [token](https://app.logz.io/#/dashboard/settings/general) of the account you want to ship to. <!-- logzio-inject:account-token --> |
+| LOGZIO_MODULES (Required) | Comma-separated list of Metricbeat modules to be enabled on this container (formatted as `"module1,module2,module3"`). To use a custom module configuration file, mount its folder to `/logzio/logzio_modules`. |
+| LOGZIO_REGION | Two-letter region code, or blank for US East (Northern Virginia). This determines your listener URL (where you're shipping the logs to) and API URL. <br> You can find your region code in the [Regions and URLs](https://docs.logz.io/user-guide/accounts/account-region.html#regions-and-urls) table. |
+| LOGZIO_TYPE (Default: `docker-collector-metrics`) | This field is needed only if you're shipping metrics to Kibana and you want to override the default value. <br> In Kibana, this is shown in the `type` field. Logz.io applies parsing based on `type`. |
+| LOGZIO_LOG_LEVEL (Default: `"INFO"`) | The log level the module startup scripts will generate. |
+| LOGZIO_EXTRA_DIMENSIONS | Semicolon-separated list of dimensions to be included with your metrics (formatted as `dimensionName1=value1;dimensionName2=value2`). <br> To use an environment variable as a value, format as `dimensionName=$ENV_VAR_NAME`. Environment variables must be the only value in the field. If an environment variable can't be resolved, the field is omitted. |
 
 ### 3. Check Logz.io for your metrics
 
-Run the docker. Give your metrics a few minutes to get from your system to ours, and then open [Kibana](https://app.logz.io/#/dashboard/kibana).
+Give your metrics a few minutes to get from your system to ours,
+and then open [Logz.io](https://app.logz.io/#/dashboard/kibana).
+
+You can view your metrics in Grafana.
+We offer preconfigured dashboards for several sources,
+which you can find by clicking **<i class="fas fa-th-large"></i> > Manage**
+in the left menu.
+
+## Modules
+
+### Docker module
+
+If you're collecting metrics from your Docker containers,
+you'll need to include `docker` in the `LOGZIO_MODULES` environment variable
+and to mount `docker.sock` at runtime.
+
+For example:
+
+```shell
+docker run --name docker-collector-metrics \
+--env LOGZIO_TOKEN="<<SHIPPING-TOKEN>>" \
+--env LOGZIO_MODULES="docker" \
+-v /var/run/docker.sock:/var/run/docker.sock:ro \
+logzio/docker-collector-metrics
+```
+
+#### Parameters for the Docker module
+
+| Parameter | Description |
+|---|---|
+| DOCKER_MATCH_CONTAINER_NAME | Comma-separated list of containers you want to collect the metrics from. If a container's name partially matches a name on the list, that container's metrics are shipped. Otherwise, its metrics are ignored. <br> **Note**: Can't be used with `DOCKER_SKIP_CONTAINER_NAME`. |
+| DOCKER_SKIP_CONTAINER_NAME | Comma-separated list of containers you want to ignore. If a container's name partially matches a name on the list, that container's metrics are ignored. Otherwise, its metrics are shipped. <br> **Note**: Can't be used with `DOCKER_MATCH_CONTAINER_NAME`. |
+| DOCKER_PERIOD (Default: `10s`) | Sampling rate of metrics. The Docker API takes up to 2 seconds to respond, so we recommend setting this to `3s` or longer. |
+| DOCKER_CERTIFICATE_AUTHORITY | Filepath to certificate authority for connecting to Docker over TLS. |
+| DOCKER_CERTIFICATE | Filepath to CA certificate for connecting to Docker over TLS. |
+| DOCKER_KEY | Filepath to Docker key for connecting to Docker over TLS. |
+
+### AWS module
+
+For the AWS module,
+you'll need to include `aws` in the `LOGZIO_MODULES` environment variable.
+
+For example:
+
+```shell
+docker run --name docker-collector-metrics \
+--env LOGZIO_TOKEN="<<SHIPPING-TOKEN>>" \
+--env LOGZIO_MODULES="aws" \
+--env AWS_ACCESS_KEY="<<ACCESS-KEY>>" \
+--env AWS_SECRET_KEY="<<SECRET-KEY>>" \
+--env AWS_REGION="<<AWS-REGION>>" \
+--env AWS_NAMESPACES="<<NAMESPACES>>" \
+logzio/docker-collector-metrics
+```
+
+You'll also need to set up an IAM user
+with the permissions to fetch the right metrics,
+and the region you're fetching metrics from.
+
+#### Region configuration
+
+You'll need to specify the AWS region you're collecting metrics from.
+
+![AWS region menu](https://dytvr9ot2sszz.cloudfront.net/logz-docs/aws/region-menu.png)
+
+Find your region's slug in the region menu
+(in the top menu, on the right side).
+
+For example:
+The slug for US East (N. Virginia)
+is "us-east-1",
+and the slug for Canada (Central) is "ca-central-1".
+
+Paste your region slug in your text editor.
+You'll need this for your Metricbeat configuration later.
+
+#### Parameters for the AWS module
+
+| Parameter | Description |
+|---|---|
+| AWS_ACCESS_KEY (Required) | Your IAM user's access key ID. |
+| AWS_SECRET_KEY (Required) | Your IAM user's secret key. |
+| AWS_REGION (Required) | Your region's slug. You can find this in the AWS region menu (in the top menu, to the right). |
+| AWS_NAMESPACES (Required) | Comma-separated list of namespaces of the metrics you want to collect. <br> You can find a complete list of namespaces at [_AWS Services That Publish CloudWatch Metrics_](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html) |
+
+### System module
+
+For the system module,
+you'll need to include `system` in the `LOGZIO_MODULES` environment variable.
+
+For example:
+
+```shell
+docker run --name docker-collector-metrics \
+--env LOGZIO_TOKEN="<<SHIPPING-TOKEN>>" \
+--env LOGZIO_MODULES="system" \
+logzio/docker-collector-metrics
+```
 
 ## Change log
+
+ - **0.1.0**:
+    - Upgraded to metricbeat 7.5.2.
+    - Renamed `LOGZIO_ADDITIONAL_FIELDS` to `LOGZIO_EXTRA_DIMENSIONS`. Dimensions will arrive under `dim`.
+    - Deprecated `LOGZIO_URL`. We are now supporting `LOGZIO_REGION`.
+    - Added AWS module.
+ - **0.0.5**: 
+    - Added docker module.
  - **0.0.4**: 
     - Refactor the image to use default Metricbeat yamls.
  - **0.0.3**: BREAKING CHANGES:
