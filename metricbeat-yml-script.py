@@ -169,8 +169,8 @@ def _add_aws_shipping_data():
                 module_yaml[SINGLE_MODULE_INDEX]["metrics"] = []
                 for aws_namespace in aws_namespaces:
                     module_yaml[SINGLE_MODULE_INDEX]["metrics"].append({"namespace": aws_namespace})
-                    if aws_namespace.lower() == "aws/lambda":
-                        module_yaml[SINGLE_MODULE_INDEX]["metrics"][-1]["tags.resource_type_filter"] = "lambda"
+                    if aws_namespace.lower() == "aws/ec2":
+                        module_yaml[SINGLE_MODULE_INDEX]["metrics"][-1]["tags.resource_type_filter"] = "ec2:instance"
                 module_yaml[SINGLE_MODULE_INDEX]["access_key_id"] = access_key_id
                 module_yaml[SINGLE_MODULE_INDEX]["secret_access_key"] = access_key
                 module_yaml[SINGLE_MODULE_INDEX]["default_region"] = aws_region
