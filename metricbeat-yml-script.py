@@ -169,14 +169,29 @@ def _add_aws_shipping_data():
                 module_yaml[SINGLE_MODULE_INDEX]["metrics"] = []
                 for aws_namespace in aws_namespaces:
                     module_yaml[SINGLE_MODULE_INDEX]["metrics"].append({"namespace": aws_namespace})
-                    if aws_namespace.lower() == "aws/ec2":
-                        module_yaml[SINGLE_MODULE_INDEX]["metrics"][-1]["tags.resource_type_filter"] = "ec2:instance"
+                    tags_val = _get_tags_value(aws_namespace)
+                    module_yaml[SINGLE_MODULE_INDEX]["metrics"][-1]["tags.resource_type_filter"] = tags_val
                 module_yaml[SINGLE_MODULE_INDEX]["access_key_id"] = access_key_id
                 module_yaml[SINGLE_MODULE_INDEX]["secret_access_key"] = access_key
                 module_yaml[SINGLE_MODULE_INDEX]["default_region"] = aws_region
                 _dump_and_close_file(module_yaml, module_file)
         except KeyError:
             logger.error("Could not find aws access key or secret key or region: {}".format(KeyError))
+
+
+def _get_tags_value(aws_namespace):
+    service_name = aws_namespace.split("/")[1].lower()
+    tags_val = service_name
+    if service_name == "ebs":
+        tags_val = "ec2:snapshot"
+    if service_name == "elb" or service_name == "applicationelb" or service_name == "networkelb":
+        tags_val = "elasticloadbalancing"
+    if service_name == "amazonmq":
+        tags_val = "mq"
+    if service_name == "efs":
+        tags_val = "elasticfilesystem"
+
+    return tags_val
 
 
 def _get_aws_namespaces():
