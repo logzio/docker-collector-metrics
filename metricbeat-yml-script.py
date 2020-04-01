@@ -181,17 +181,16 @@ def _add_aws_shipping_data():
 
 def _get_tags_value(aws_namespace):
     service_name = aws_namespace.split("/")[1].lower()
-    tags_val = service_name
     if service_name == "ebs":
-        tags_val = "ec2:snapshot"
-    if service_name == "elb" or service_name == "applicationelb" or service_name == "networkelb":
-        tags_val = "elasticloadbalancing"
-    if service_name == "amazonmq":
-        tags_val = "mq"
-    if service_name == "efs":
-        tags_val = "elasticfilesystem"
-
-    return tags_val
+        return "ec2:snapshot"
+    elif service_name == "elb" or service_name == "applicationelb" or service_name == "networkelb":
+        return "elasticloadbalancing"
+    elif service_name == "amazonmq":
+        return "mq"
+    elif service_name == "efs":
+        return "elasticfilesystem"
+    else:
+        return service_name
 
 
 def _get_aws_namespaces():
