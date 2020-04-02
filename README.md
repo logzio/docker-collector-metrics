@@ -153,7 +153,8 @@ logzio/docker-collector-metrics
 ```
 
 ## Change log
-
+ - **0.1.1**:
+    - Pulling tags from AWS services.
  - **0.1.0**:
     - Upgraded to metricbeat 7.5.2.
     - Renamed `LOGZIO_ADDITIONAL_FIELDS` to `LOGZIO_EXTRA_DIMENSIONS`. Dimensions will arrive under `dim`.
