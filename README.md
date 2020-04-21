@@ -140,9 +140,10 @@ You'll need this for your Metricbeat configuration later.
 
 ### System module
 
-Use this to monitor Linux systems only, for other types of system like OSX/Windows use [Metricbeat locally](https://docs.logz.io/shipping/metrics-sources/system.html).
 For the system module,
 you'll need to include `system` in the `LOGZIO_MODULES` environment variable.
+
+Use this to monitor Linux systems only, for other types of system like OSX/Windows use [Metricbeat locally](https://docs.logz.io/shipping/metrics-sources/system.html).
 
 For example:
 
