@@ -140,6 +140,10 @@ You'll need this for your Metricbeat configuration later.
 
 ### System module
 
+**Note**:
+This Docker container monitors Linux system metrics only.
+For other OSes, we recommend [running Metricbeat locally](https://docs.logz.io/shipping/metrics-sources/system.html) on the system itself.
+
 For the system module,
 you'll need to include `system` in the `LOGZIO_MODULES` environment variable.
 
