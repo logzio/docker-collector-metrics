@@ -181,7 +181,7 @@ def _add_aws_shipping_data():
 
 
 def _get_tags_value(aws_namespace):
-    if "aws/" in aws_namespace:
+    if "aws/" in aws_namespace.lower():
         service_name = aws_namespace.split("/")[1].lower()
         if service_name == "ebs":
             return "ec2:snapshot"
