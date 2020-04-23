@@ -164,6 +164,8 @@ logzio/docker-collector-metrics
 ```
 
 ## Change log
+ - **0.1.2**:
+    - Pulling metrics from custom AWS namespaces.
  - **0.1.1**:
     - Pulling tags from AWS services.
  - **0.1.0**:
