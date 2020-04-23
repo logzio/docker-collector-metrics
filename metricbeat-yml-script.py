@@ -170,7 +170,8 @@ def _add_aws_shipping_data():
                 for aws_namespace in aws_namespaces:
                     module_yaml[SINGLE_MODULE_INDEX]["metrics"].append({"namespace": aws_namespace})
                     tags_val = _get_tags_value(aws_namespace)
-                    module_yaml[SINGLE_MODULE_INDEX]["metrics"][-1]["tags.resource_type_filter"] = tags_val
+                    if tags_val != "":
+                        module_yaml[SINGLE_MODULE_INDEX]["metrics"][-1]["tags.resource_type_filter"] = tags_val
                 module_yaml[SINGLE_MODULE_INDEX]["access_key_id"] = access_key_id
                 module_yaml[SINGLE_MODULE_INDEX]["secret_access_key"] = access_key
                 module_yaml[SINGLE_MODULE_INDEX]["default_region"] = aws_region
@@ -180,17 +181,23 @@ def _add_aws_shipping_data():
 
 
 def _get_tags_value(aws_namespace):
-    service_name = aws_namespace.split("/")[1].lower()
-    if service_name == "ebs":
-        return "ec2:snapshot"
-    elif service_name == "elb" or service_name == "applicationelb" or service_name == "networkelb":
-        return "elasticloadbalancing"
-    elif service_name == "amazonmq":
-        return "mq"
-    elif service_name == "efs":
-        return "elasticfilesystem"
+    if "aws/" in aws_namespace:
+        service_name = aws_namespace.split("/")[1].lower()
+        if service_name == "ebs":
+            return "ec2:snapshot"
+        elif service_name == "elb" or service_name == "applicationelb" or service_name == "networkelb":
+            return "elasticloadbalancing"
+        elif service_name == "amazonmq":
+            return "mq"
+        elif service_name == "efs":
+            return "elasticfilesystem"
+        else:
+            return service_name
     else:
-        return service_name
+        if aws_namespace.lower() == "waf":
+            return "waf"
+        else:
+            return ""
 
 
 def _get_aws_namespaces():
