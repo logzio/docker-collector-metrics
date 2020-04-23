@@ -194,10 +194,7 @@ def _get_tags_value(aws_namespace):
         else:
             return service_name
     else:
-        if aws_namespace.lower() == "waf":
-            return "waf"
-        else:
-            return ""
+        return aws_namespace.lower()
 
 
 def _get_aws_namespaces():
