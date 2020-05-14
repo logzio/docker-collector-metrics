@@ -11,10 +11,10 @@ RUN apt-get update && \
     curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-7.5.2-amd64.deb && \
     dpkg -i metricbeat-7.5.2-amd64.deb && \
     rm metricbeat-7.5.2-amd64.deb && \
-    wget https://raw.githubusercontent.com/logzio/public-certificates/master/COMODORSADomainValidationSecureServerCA.crt && \
+    wget https://raw.githubusercontent.com/logzio/public-certificates/master/TrustExternalCARoot_and_USERTrustRSAAAACA.crt && \
     mkdir -p /etc/pki/tls/certs && \
-    cp COMODORSADomainValidationSecureServerCA.crt /etc/pki/tls/certs/ && \
-    rm COMODORSADomainValidationSecureServerCA.crt && \
+    cp TrustExternalCARoot_and_USERTrustRSAAAACA.crt /etc/pki/tls/certs/ && \
+    rm TrustExternalCARoot_and_USERTrustRSAAAACA.crt && \
     pip install -r requirements.txt && \
     rm requirements.txt && \
     mkdir -p ${LOGZIO_DIR_PATH}
