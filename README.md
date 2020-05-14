@@ -164,6 +164,8 @@ logzio/docker-collector-metrics
 ```
 
 ## Change log
+ - **0.1.3**:
+    - Updated new public SSL certificate in Docker image & Metricbeat configuration.
  - **0.1.2**:
     - Pulling metrics from custom AWS namespaces.
  - **0.1.1**:

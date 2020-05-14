@@ -11,4 +11,4 @@ ignore_older: 3hr
 #================================ Outputs =====================================
 output.logstash:
   hosts: []
-  ssl.certificate_authorities: ['/etc/pki/tls/certs/COMODORSADomainValidationSecureServerCA.crt']
+  ssl.certificate_authorities: ['/etc/pki/tls/certs/TrustExternalCARoot_and_USERTrustRSAAAACA.crt']
