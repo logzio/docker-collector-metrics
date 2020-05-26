@@ -216,10 +216,19 @@ def _dump_and_close_file(module_yaml, module_file):
     module_file.close()
 
 
+def _get_debug_mode():
+    debug = os.getenv("DEBUG", "false")
+    if debug == "true":
+        return '-d "*"'
+    else:
+        return ""
+
+
 logger = _create_logger()
 _set_url()
 _is_open()
 _add_modules()
 _add_shipping_data()
+debug_mode = _get_debug_mode()
 
-os.system("metricbeat -e")
+os.system("metricbeat -e {}".format(debug_mode))
