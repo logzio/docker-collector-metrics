@@ -1,16 +1,23 @@
-FROM python:3.7-slim
+FROM arm32v7/python:3.7-slim
 
 COPY requirements.txt ./requirements.txt
 
+ENV PACKAGE=metricbeat-7.5.2-linux-arm32v7.tar.gz
+ENV METRICBEAT_DIR=/opt/metricbeat
+ENV METRICBEAT_CONFIG_DIR=/etc/metricbeat
 ENV LOGZIO_DIR_PATH /logzio
 ENV LOGZIO_MODULES_PATH ${LOGZIO_DIR_PATH}/modules
 
+COPY $PACKAGE $PACKAGE
+COPY metricbeat.sh /usr/bin/metricbeat
 
 RUN apt-get update && \
     apt-get install -y curl wget && \
-    curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-7.5.2-amd64.deb && \
-    dpkg -i metricbeat-7.5.2-amd64.deb && \
-    rm metricbeat-7.5.2-amd64.deb && \
+    mkdir -p $METRICBEAT_DIR && \
+    mkdir -p $METRICBEAT_CONFIG_DIR && \
+    tar --no-same-owner --strip-components=1 -zxf "$PACKAGE" -C $METRICBEAT_DIR && \
+    mv $METRICBEAT_DIR/metricbeat.yml $METRICBEAT_CONFIG_DIR && \
+    rm -f "$PACKAGE" && \
     wget https://raw.githubusercontent.com/logzio/public-certificates/master/TrustExternalCARoot_and_USERTrustRSAAAACA.crt && \
     mkdir -p /etc/pki/tls/certs && \
     cp TrustExternalCARoot_and_USERTrustRSAAAACA.crt /etc/pki/tls/certs/ && \
