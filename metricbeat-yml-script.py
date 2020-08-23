@@ -107,6 +107,10 @@ def _add_shipping_data():
     conf["fields"]["type"] = os.getenv("LOGZIO_TYPE", "docker-collector-metrics")
 
     additional_field = _get_additional_fields()
+
+    hostname = _get_host_name()
+    if hostname is not '':
+        conf["name"] = hostname
     if len(additional_field) > 0:
         conf["fields"]["dim"] = {}
     for key in additional_field:
@@ -150,7 +154,8 @@ def parse_entry(entry):
 
 def _add_data_by_module(modules):
     for module in modules:
-        if module.lower() == "aws":
+        module_name = module.lower()
+        if module_name == "aws":
             _add_aws_shipping_data()
 
 
@@ -181,8 +186,9 @@ def _add_aws_shipping_data():
 
 
 def _get_tags_value(aws_namespace):
-    if "aws/" in aws_namespace.lower():
-        service_name = aws_namespace.split("/")[1].lower()
+    aws_namespace_lower = aws_namespace.lower()
+    if "aws/" in aws_namespace_lower:
+        service_name = aws_namespace_lower.split("/")[1]
         if service_name == "ebs":
             return "ec2:snapshot"
         elif service_name == "elb" or service_name == "applicationelb" or service_name == "networkelb":
@@ -194,7 +200,7 @@ def _get_tags_value(aws_namespace):
         else:
             return service_name
     else:
-        return aws_namespace.lower()
+        return aws_namespace_lower
 
 
 def _get_aws_namespaces():
@@ -222,6 +228,10 @@ def _get_debug_mode():
         return '-d "*"'
     else:
         return ""
+
+
+def _get_host_name():
+    return os.getenv("HOSTNAME", '')
 
 
 logger = _create_logger()
