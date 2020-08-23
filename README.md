@@ -51,7 +51,7 @@ in the [_Modules_](#modules) section at the bottom of this doc.
 | LOGZIO_LOG_LEVEL (Default: `"INFO"`) | The log level the module startup scripts will generate. |
 | LOGZIO_EXTRA_DIMENSIONS | Semicolon-separated list of dimensions to be included with your metrics (formatted as `dimensionName1=value1;dimensionName2=value2`). <br> To use an environment variable as a value, format as `dimensionName=$ENV_VAR_NAME`. Environment variables must be the only value in the field. If an environment variable can't be resolved, the field is omitted. |
 | DEBUG (Default: `false`) | Set to `true` if you want Metricbeat to run in debug mode.<br/> **Note:** Debug mode tends to generate a lot of debugging output, so you should probably enable it temporarily only when an error occurs while running the docker-collector in production.  |
-| HOSTNAME (Default: `''`) | Insert your host name if you want it to appear in the metrics' `host.name`. If no value entered,  `host.name` will show the container's id. |
+| HOSTNAME (Default: `''`) | Insert your host name if you want it to appear in the metrics' `host.name`. If no value entered,  `host.name` will show the container's ID. |
 
 ### 3. Check Logz.io for your metrics
 
