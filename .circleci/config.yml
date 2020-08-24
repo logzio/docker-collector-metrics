@@ -17,4 +17,17 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                - develop
+      - docker-buildx/publish:
+          name: build_deploy_docker_tag
+          context: docker-publishing
+          checkout: true
+          attach-workspace: true
+          image: foodlestech/logzio-docker-collector-metrics
+          tag: latest
+          extra_tags_env_var: CIRCLE_TAG
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              ignore: /.*/
