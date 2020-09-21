@@ -78,6 +78,8 @@ def _add_modules():
         logger.error("Required at least one module")
         raise
     _enable_modules(modules)
+    if os.environ["CLOUD_METADATA"] == "true":
+        _enable_cloud_metadata(modules)
     _add_data_by_module(modules)
 
 
@@ -91,6 +93,19 @@ def _enable_modules(modules):
         with open("modules/{}.yml".format(module), "r+") as module_file:
             module_yaml = yaml.load(module_file)
             module_yaml[SINGLE_MODULE_INDEX]["enabled"] = True
+            _dump_and_close_file(module_yaml, module_file)
+
+
+def _enable_cloud_metadata(modules):
+    yaml = YAML()
+    yaml.preserve_quotes = True
+    for module in modules:
+        if module not in SUPPORTED_MODULES:
+            logger.error("Unsupported module: {}".format(module))
+            raise RuntimeError
+        with open("modules/{}.yml".format(module), "r+") as module_file:
+            module_yaml = yaml.load(module_file)
+            module_yaml[SINGLE_MODULE_INDEX]["processors"] = [dict(add_cloud_metadata=dict(timeout="3s"))]
             _dump_and_close_file(module_yaml, module_file)
 
 
