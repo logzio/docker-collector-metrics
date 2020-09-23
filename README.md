@@ -167,6 +167,8 @@ logzio/docker-collector-metrics
 ```
 
 ## Change log
+ - **0.1.6**:
+    - Supports adding cloud metadata.
  - **0.1.5**:
     - Supports adding hostname.
  - **0.1.4**:
