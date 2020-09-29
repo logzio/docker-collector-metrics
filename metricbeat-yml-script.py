@@ -94,6 +94,22 @@ def _enable_modules(modules):
             _dump_and_close_file(module_yaml, module_file)
 
 
+def _enable_cloud_metadata(module):
+    yaml = YAML()
+    yaml.preserve_quotes = True
+    if module not in SUPPORTED_MODULES:
+        logger.error("Unsupported module: {}".format(module))
+        raise RuntimeError
+    with open("modules/{}.yml".format(module), "r+") as module_file:
+        module_yaml = yaml.load(module_file)
+        cloud_metadata = dict(add_cloud_metadata=dict(timeout="3s"))
+        if "processors" in module_yaml[0]:
+            module_yaml[SINGLE_MODULE_INDEX]["processors"].append(cloud_metadata)
+        else:
+            module_yaml[SINGLE_MODULE_INDEX]["processors"] = [cloud_metadata]
+        _dump_and_close_file(module_yaml, module_file)
+
+
 def _add_shipping_data():
     token = os.environ["LOGZIO_TOKEN"]
 
@@ -157,6 +173,8 @@ def _add_data_by_module(modules):
         module_name = module.lower()
         if module_name == "aws":
             _add_aws_shipping_data()
+        if os.getenv("CLOUD_METADATA", "false") == "true":
+            _enable_cloud_metadata(module)
 
 
 def _add_aws_shipping_data():
