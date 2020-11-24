@@ -194,7 +194,7 @@ def _add_aws_shipping_data():
                     module_yaml[SINGLE_MODULE_INDEX]["metrics"].append({"namespace": aws_namespace})
                     tags_val = _get_tags_value(aws_namespace)
                     if tags_val != "":
-                        module_yaml[SINGLE_MODULE_INDEX]["metrics"][-1]["tags.resource_type_filter"] = tags_val
+                        module_yaml[SINGLE_MODULE_INDEX]["metrics"][-1]["resource_type"] = tags_val
                 module_yaml[SINGLE_MODULE_INDEX]["access_key_id"] = access_key_id
                 module_yaml[SINGLE_MODULE_INDEX]["secret_access_key"] = access_key
                 module_yaml[SINGLE_MODULE_INDEX]["default_region"] = aws_region
