@@ -169,8 +169,8 @@ logzio/docker-collector-metrics
 ```
 
 ## Change log
- - **0.1.7**:
-    - **Breaking change:** Upgraded to Metricbeat 7.10.
+ - **0.2.0**:
+    - **[Breaking change](https://www.elastic.co/guide/en/beats/libbeat/7.10/breaking-changes-7.7.html):** Upgraded to Metricbeat 7.10.
  - **0.1.6**:
     - Supports adding cloud metadata.
  - **0.1.5**:
