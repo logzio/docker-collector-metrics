@@ -181,9 +181,14 @@ def _add_aws_shipping_data():
     aws_namespaces = _get_aws_namespaces()
     if len(aws_namespaces) > 0:
         try:
-            access_key_id = os.environ["AWS_ACCESS_KEY"]
-            access_key = os.environ["AWS_SECRET_KEY"]
-            aws_region = os.environ["AWS_REGION"]
+            aws_credentials = ["AWS_DEFAULT_REGION", "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN","AWS_ROLE_ARN", "AWS_CREDENTIAL_PROFILE_NAME", "AWS_SHARED_CREDENTIAL_NAME"]
+            aws_credentials_dict = {}
+
+            for credential in aws_credentials:
+                if credential in os.environ:
+                    aws_credentials_dict[credential] = os.environ[credential]
+            if len(aws_credentials_dict) == 0:
+                raise KeyError("Could not find AWS credential or region")
             yaml = YAML()
             yaml.preserve_quotes = True
 
@@ -195,13 +200,15 @@ def _add_aws_shipping_data():
                     tags_val = _get_tags_value(aws_namespace)
                     if tags_val != "":
                         module_yaml[SINGLE_MODULE_INDEX]["metrics"][-1]["resource_type"] = tags_val
-                module_yaml[SINGLE_MODULE_INDEX]["access_key_id"] = access_key_id
-                module_yaml[SINGLE_MODULE_INDEX]["secret_access_key"] = access_key
-                module_yaml[SINGLE_MODULE_INDEX]["default_region"] = aws_region
-                _dump_and_close_file(module_yaml, module_file)
-        except KeyError:
-            logger.error("Could not find aws access key or secret key or region: {}".format(KeyError))
 
+                for key, value in aws_credentials_dict.items():
+                    key = key.lower().replace("aws_", "")
+                    module_yaml[SINGLE_MODULE_INDEX][key] = value
+                _dump_and_close_file(module_yaml, module_file)
+
+        except Exception as e:
+            logger.error(str(e))
+            raise
 
 def _get_tags_value(aws_namespace):
     aws_namespace_lower = aws_namespace.lower()
