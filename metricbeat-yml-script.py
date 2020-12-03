@@ -181,7 +181,7 @@ def _add_aws_shipping_data():
     aws_namespaces = _get_aws_namespaces()
     if len(aws_namespaces) > 0:
         try:
-            aws_credentials = ["AWS_DEFAULT_REGION", "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN","AWS_ROLE_ARN", "AWS_CREDENTIAL_PROFILE_NAME", "AWS_SHARED_CREDENTIAL_NAME"]
+            aws_credentials = ["AWS_DEFAULT_REGION", "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN","AWS_ROLE_ARN", "AWS_CREDENTIAL_PROFILE_NAME", "AWS_SHARED_CREDENTIAL_FILE"]
             aws_credentials_dict = {}
 
             for credential in aws_credentials:
