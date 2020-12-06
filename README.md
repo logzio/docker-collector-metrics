@@ -176,6 +176,7 @@ logzio/docker-collector-metrics
 ## Change log
  - **0.2.1**:
     - Supports more AWS credentials (thanks [@NingPekin](https://github.com/NingPekin)!).
+    - Refactored aws params.
  - **0.2.0**:
     - **[Breaking change](https://www.elastic.co/guide/en/beats/libbeat/7.10/breaking-changes-7.7.html):** Upgraded to Metricbeat 7.10.
  - **0.1.6**:
