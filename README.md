@@ -144,7 +144,7 @@ You'll need this for your Metricbeat configuration later.
 | AWS_ROLE_ARN | Your IAM role to assume. |
 | AWS_DEFAULT_REGION (Required) | Your region's slug. You can find this in the AWS region menu (in the top menu, to the right). |
 | AWS_CREDENTIAL_PROFILE_NAME | Your profile name in shared credentials file. |
-| AWS_SHARED_CREDENTIAL_FILE | Your directory of the shared credentials file. <br> **Note:** If you're using this parameter, you'll have to mount your credentials folder, meaning you'll need to add to your `docker run` command the line: <br> `-v /path/to/your/aws/credentials/folder:/root/.aws:ro`. <br> You'll also need to have an ARN role set either on your credential file or with the parameter `AWS_ROLE_ARN`. |
+| AWS_SHARED_CREDENTIAL_FILE | Your directory of the shared credentials file, in your docker instance. <br> **Note:** If you're using this parameter, you'll have to mount your credentials folder, meaning you'll need to add to your `docker run` command the line: <br> `-v /path/to/your/aws/credentials/folder:<<path/to/shared/credential/file/in/docker>>:ro`. <br> You'll also need to have an ARN role set either on your credential file or with the parameter `AWS_ROLE_ARN`. |
 | AWS_NAMESPACES (Required) | Comma-separated list of namespaces of the metrics you want to collect. <br> You can find a complete list of namespaces at [_AWS Services That Publish CloudWatch Metrics_](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html) |
 
 About how to use aws credentials, you can refer [AWS Credentials Configration](https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-module-aws.html#aws-credentials-config)
