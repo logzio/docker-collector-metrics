@@ -104,9 +104,9 @@ For example:
 docker run --name docker-collector-metrics \
 --env LOGZIO_TOKEN="<<SHIPPING-TOKEN>>" \
 --env LOGZIO_MODULES="aws" \
---env AWS_ACCESS_KEY="<<ACCESS-KEY>>" \
---env AWS_SECRET_KEY="<<SECRET-KEY>>" \
---env AWS_REGION="<<AWS-REGION>>" \
+--env AWS_ACCESS_KEY_ID="<<ACCESS-KEY>>" \
+--env AWS_SECRET_ACCESS_KEY="<<SECRET-KEY>>" \
+--env AWS_DEFAULT_REGION="<<AWS-REGION>>" \
 --env AWS_NAMESPACES="<<NAMESPACES>>" \
 logzio/docker-collector-metrics
 ```
@@ -138,11 +138,16 @@ You'll need this for your Metricbeat configuration later.
 
 | Parameter | Description |
 |---|---|
-| AWS_ACCESS_KEY (Required) | Your IAM user's access key ID. |
-| AWS_SECRET_KEY (Required) | Your IAM user's secret key. |
-| AWS_REGION (Required) | Your region's slug. You can find this in the AWS region menu (in the top menu, to the right). |
+| AWS_ACCESS_KEY_ID | Your IAM user's access key ID. |
+| AWS_SECRET_ACCESS_KEY | Your IAM user's secret key. |
+| AWS_SESSION_TOKEN | Your IAM user's session token. |
+| AWS_ROLE_ARN | Your IAM role to assume. |
+| AWS_DEFAULT_REGION (Required) | Your region's slug. You can find this in the AWS region menu (in the top menu, to the right). |
+| AWS_CREDENTIAL_PROFILE_NAME | Your profile name in shared credentials file. |
+| AWS_SHARED_CREDENTIAL_FILE | Your directory of the shared credentials file, in your docker instance. <br> **Note:** If you're using this parameter, you'll have to mount your credentials folder, meaning you'll need to add to your `docker run` command the line: <br> `-v /path/to/your/aws/credentials/folder:<<path/to/shared/credential/file/in/docker>>:ro`. <br> You'll also need to have an ARN role set either on your credential file or with the parameter `AWS_ROLE_ARN`. |
 | AWS_NAMESPACES (Required) | Comma-separated list of namespaces of the metrics you want to collect. <br> You can find a complete list of namespaces at [_AWS Services That Publish CloudWatch Metrics_](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html) |
 
+About how to use aws credentials, you can refer [AWS Credentials Configration](https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-module-aws.html#aws-credentials-config)
 ### System module
 
 **Note**:
@@ -169,6 +174,9 @@ logzio/docker-collector-metrics
 ```
 
 ## Change log
+ - **0.2.1**:
+    - Supports more AWS credentials (thanks [@NingPekin](https://github.com/NingPekin)!).
+    - Refactored aws params.
  - **0.2.0**:
     - **[Breaking change](https://www.elastic.co/guide/en/beats/libbeat/7.10/breaking-changes-7.7.html):** Upgraded to Metricbeat 7.10.
  - **0.1.6**:
@@ -188,9 +196,9 @@ logzio/docker-collector-metrics
     - Renamed `LOGZIO_ADDITIONAL_FIELDS` to `LOGZIO_EXTRA_DIMENSIONS`. Dimensions will arrive under `dim`.
     - Deprecated `LOGZIO_URL`. We are now supporting `LOGZIO_REGION`.
     - Added AWS module.
- - **0.0.5**: 
+ - **0.0.5**:
     - Added docker module.
- - **0.0.4**: 
+ - **0.0.4**:
     - Refactor the image to use default Metricbeat yamls.
  - **0.0.3**: BREAKING CHANGES:
     - using beats7
