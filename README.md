@@ -82,15 +82,6 @@ docker run --name docker-collector-metrics \
 logzio/docker-collector-metrics
 ```
 
-#### Parameters for the Docker module
-
-| Parameter | Description |
-|---|---|
-| DOCKER_PERIOD (Default: `10s`) | Sampling rate of metrics. The Docker API takes up to 2 seconds to respond, so we recommend setting this to `3s` or longer. |
-| DOCKER_CERTIFICATE_AUTHORITY | Filepath to certificate authority for connecting to Docker over TLS. |
-| DOCKER_CERTIFICATE | Filepath to CA certificate for connecting to Docker over TLS. |
-| DOCKER_KEY | Filepath to Docker key for connecting to Docker over TLS. |
-
 ### AWS module
 
 For the AWS module,
