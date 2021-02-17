@@ -44,7 +44,7 @@ in the [_Modules_](#modules) section at the bottom of this doc.
 
 | Parameter | Description |
 |---|---|
-| LOGZIO_TOKEN (Required) | Your Logz.io account token. Replace `<<SHIPPING-TOKEN>>` with the [token](https://app.logz.io/#/dashboard/settings/general) of the account you want to ship to. <!-- logzio-inject:account-token --> |
+| LOGZIO_TOKEN (Required) | Your Logz.io metrics account token. Replace `<<SHIPPING-TOKEN>>` with the [token](https://app.logz.io/#/dashboard/settings/general)(see 'Metrics account plan' section') of the account you want to ship to. <!-- logzio-inject:account-token --> |
 | LOGZIO_MODULES (Required) | Comma-separated list of Metricbeat modules to be enabled on this container (formatted as `"module1,module2,module3"`). To use a custom module configuration file, mount its folder to `/logzio/modules`. |
 | LOGZIO_REGION | Two-letter region code, or blank for US East (Northern Virginia). This determines your listener URL (where you're shipping the logs to) and API URL. <br> You can find your region code in the [Regions and URLs](https://docs.logz.io/user-guide/accounts/account-region.html#regions-and-urls) table. |
 | LOGZIO_TYPE (Default: `docker-collector-metrics`) | This field is needed only if you're shipping metrics to Kibana and you want to override the default value. <br> In Kibana, this is shown in the `type` field. Logz.io applies parsing based on `type`. |
