@@ -1,3 +1,7 @@
+# This project is depreacted and shouldn't be use anymore
+
+
+
 # Docker Metrics Collector
 
 To simplify shipping metrics from one or many sources,
