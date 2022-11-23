@@ -6,9 +6,9 @@ ENV LOGZIO_DIR_PATH /logzio
 ENV LOGZIO_MODULES_PATH ${LOGZIO_DIR_PATH}/modules
 
 
-RUN apt-get update && \
-    apt-get install -y curl wget && \
-    curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-7.10.0-amd64.deb && \
+RUN apt-get update && apt-get install --no-install-recommends -y wget && \
+    rm -rf /var/lib/apt/lists/* && \ 
+    wget --quiet https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-7.10.0-amd64.deb && \
     dpkg -i metricbeat-7.10.0-amd64.deb && \
     rm metricbeat-7.10.0-amd64.deb && \
     wget https://raw.githubusercontent.com/logzio/public-certificates/master/TrustExternalCARoot_and_USERTrustRSAAAACA.crt && \
